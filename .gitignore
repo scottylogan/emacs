@@ -3,3 +3,4 @@ var/
 *.elc
 elpa/
 network-security.data
+.cask/
