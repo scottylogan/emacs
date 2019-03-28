@@ -30,5 +30,19 @@
 ;; keep this last
 (load custom-file)
 
+;; save backup files under ~/.saves, with versioning
+;; https://www.emacswiki.org/emacs/BackupDirectory
+(setq
+   backup-by-copying t      ; don't clobber symlinks
+   version-control t        ; use versioned backups
+   delete-old-versions t
+   kept-new-versions 6
+   kept-old-versions 2
+   backup-directory-alist
+    `(("." . "~/.saves/"))    ; don't litter my fs tree
+   )
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+
 (server-start)
 
