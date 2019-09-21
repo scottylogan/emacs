@@ -11,6 +11,7 @@
   )
 
 (setq custom-file "~/.emacs.d/custom.el")
+(load "~/.emacs.d/freeradius-mode/freeradius-mode.el")
 
 ;; based on https://stackoverflow.com/questions/25791605/emacs-how-do-i-create-a-new-empty-buffer-whenever-creating-a-new-frame
 
