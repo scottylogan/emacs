@@ -25,8 +25,11 @@
 (global-set-key (kbd "s-n") #'scotty-new-empty-frame)
 (global-set-key (kbd "s-r") #'replace-string)
 
-(setq tab-width 2) ; or any other preferred value
-(defvaralias 'c-basic-offset 'tab-width)
+;;(setq tab-width 2) ; or any other preferred value
+(setq-default tab-width 2)
+(setq-default c-basic-offset 'tab-width)
+(setq-default c-basic-indent 'tab-width)
+(add-hook 'php-mode-hook #'(lambda() (setq c-basic-offset 2)))
 (defvaralias 'cperl-indent-level 'tab-width)
 ;; keep this last
 (load custom-file)
