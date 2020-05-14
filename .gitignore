@@ -4,3 +4,4 @@ var/
 elpa/
 network-security.data
 .cask/
+transient/
