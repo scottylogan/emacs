@@ -47,5 +47,7 @@
 
 (add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
 
-(server-start)
+;;; now using emacsclient -a '' -c aliased to emacs to start daemon
+;;; automatically
+;;;(server-start)
 
