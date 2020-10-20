@@ -58,3 +58,4 @@
              (server-running-p))
   (server-start))
 
+(put 'downcase-region 'disabled nil)
