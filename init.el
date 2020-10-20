@@ -4,13 +4,20 @@
 
 (package-initialize)
 
-(when (eq system-type 'darwin)
-  ;; default Latin font
-  (set-face-attribute 'default nil :family "SF Mono")
-  (set-face-attribute 'default nil :height 160)
-  )
-
 (setq custom-file "~/.emacs.d/custom.el")
+
+(defun scotty-frame-setup (&optional frame)
+  "Configure new frames."
+  (when (and (eq system-type 'darwin) (eq window-system 'ns))
+    ;; default Latin font
+    (set-face-attribute 'default frame :family "Input Mono")
+    (set-face-attribute 'default frame :height
+                        (cond ((< (display-pixel-height) 1080) 160)
+                              (t 220)))))
+  
+(add-hook 'after-make-frame-functions 'scotty-frame-setup)
+
+(scotty-frame-setup)
 
 ;; based on https://stackoverflow.com/questions/25791605/emacs-how-do-i-create-a-new-empty-buffer-whenever-creating-a-new-frame
 
@@ -47,7 +54,7 @@
 
 (add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
 
-;;; now using emacsclient -a '' -c aliased to emacs to start daemon
-;;; automatically
-;;;(server-start)
+(unless (and (fboundp 'server-running-p)
+             (server-running-p))
+  (server-start))
 
