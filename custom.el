@@ -5,6 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(apache-indent-level 2)
  '(column-number-mode t)
+ '(freeradius-indent-offset 2)
  '(indent-tabs-mode nil)
  '(js-indent-level 2)
  '(menu-bar-mode nil)
