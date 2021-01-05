@@ -4,7 +4,9 @@
 
 (package-initialize)
 
+(setq default-directory "~/")
 (setq custom-file "~/.emacs.d/custom.el")
+(setq inhibit-splash-screen t)
 
 (defun scotty-frame-setup (&optional frame)
   "Configure new frames."
@@ -13,6 +15,7 @@
     (set-face-attribute 'default frame :family "Input Mono")
     (set-face-attribute 'default frame :height
                         (cond ((< (display-pixel-height) 1080) 160)
+                              ((< (display-pixel-height) 2560) 300)
                               (t 220)))))
   
 (add-hook 'after-make-frame-functions 'scotty-frame-setup)
@@ -33,8 +36,13 @@
 
 ;;(setq tab-width 2) ; or any other preferred value
 (setq-default tab-width 2)
-(setq-default c-basic-offset 'tab-width)
-(setq-default c-basic-indent 'tab-width)
+(setq-default c-basic-offset tab-width)
+(setq-default c-basic-indent tab-width)
+;; set this in all c-based programming modes
+(add-hook 'c-mode-common-hook
+          (lambda ()
+            (c-set-offset 'case-label '+)))
+
 (add-hook 'php-mode-hook #'(lambda() (setq c-basic-offset 2)))
 (defvaralias 'cperl-indent-level 'tab-width)
 ;; keep this last
