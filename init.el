@@ -15,7 +15,7 @@
     (set-face-attribute 'default frame :family "Input Mono")
     (set-face-attribute 'default frame :height
                         (cond ((< (display-pixel-height) 1080) 160)
-                              ((< (display-pixel-height) 2560) 300)
+                              ((>= (display-pixel-height) 2160) 300)
                               (t 220)))))
   
 (add-hook 'after-make-frame-functions 'scotty-frame-setup)
