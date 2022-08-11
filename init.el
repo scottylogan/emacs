@@ -14,15 +14,18 @@
   "Configure new frames."
   (when (and (eq system-type 'darwin) (eq window-system 'ns))
     ;; default Latin font
-    (set-face-attribute 'default frame :family "Input Mono")
+    (set-face-attribute 'default frame :family "SF Mono")
     (set-face-attribute 'default frame :height
                         (cond ((< (display-pixel-height) 1080) 160)
                               ((>= (display-pixel-height) 2160) 300)
                               (t 220)))))
   
-(add-hook 'after-make-frame-functions 'scotty-frame-setup)
-
-(scotty-frame-setup)
+(if (daemonp)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame)
+                (select-frame frame)
+                (scotty-frame-setup)))
+  (scotty-frame-setup))
 
 ;; based on https://stackoverflow.com/questions/25791605/emacs-how-do-i-create-a-new-empty-buffer-whenever-creating-a-new-frame
 
