@@ -1,12 +1,25 @@
-(require 'package)
-
-(add-to-list 'package-archives (cons "melpa" "https://melpa.org/packages/") t)
-
-(package-initialize)
-
+;;; ----- GENERIC SETTINGS
 (setq default-directory "~/")
 (setq custom-file "~/.emacs.d/custom.el")
 (setq inhibit-splash-screen t)
+
+(put 'downcase-region 'disabled nil)
+
+(tool-bar-mode -1)
+(tooltip-mode -1)
+(column-number-mode)
+
+(when (not window-system)
+  (menu-bar-mode -1))
+
+
+;;; ----- GLOBAL KEY MAPPING
+
+(global-set-key (kbd "s-n") #'scotty-new-empty-frame)
+(global-set-key (kbd "s-r") #'replace-string)
+
+
+;;; ----- FRAMES
 
 (setq frame-title-format "%f")
 
@@ -36,22 +49,170 @@
     (set-buffer-major-mode buffer)
     (display-buffer buffer '(display-buffer-pop-up-frame . nil))))
 
-(global-set-key (kbd "s-n") #'scotty-new-empty-frame)
-(global-set-key (kbd "s-r") #'replace-string)
 
-;;(setq tab-width 2) ; or any other preferred value
+;;; ----- PATH
+
+(setq-default exec-path
+              '(
+                "~/bin/"
+                "/usr/local/bin"
+                "/usr/bin"
+                "/bin"
+                "/usr/local/sbin"
+                "/usr/sbin"
+                "/sbin"
+                "/Applications/Emacs.app/Contents/MacOS/bin-x86_64-10_14"
+                "/Applications/Emacs.app/Contents/MacOS/libexec-x86_64-10_14"
+                "/Applications/Emacs.app/Contents/MacOS/libexec"
+                "/Applications/Emacs.app/Contents/MacOS/bin"
+                ))
+
+;;; ----- PACKAGES
+
+(require 'package)
+
+(add-to-list 'package-archives (cons "melpa" "https://melpa.org/packages/") t)
+
+(package-initialize)
+
+(setq-default package-selected-packages
+              '(
+                ac-html
+                ac-html-bootstrap
+                ac-js2
+                ac-php
+                ac-php-core
+                ansi
+                apache-mode
+                apt-sources-list
+                cask
+                cask-mode
+                commander
+                composer
+                dash
+                dayone
+                docker
+                dockerfile-mode
+                egg
+                epl
+                f
+                feature-mode
+                flymake-jshint
+                flymake-jslint
+                flymake-json
+                flymake-php
+                flymake-phpcs
+                flymake-puppet
+                flymake-shell
+                flymake-yaml
+                fold-this
+                fontawesome
+                freeradius-mode
+                gist
+                git
+                git-timemachine
+                gitattributes-mode
+                gitconfig
+                gitconfig-mode
+                github-browse-file
+                github-clone
+                github-issues
+                github-theme
+                gitignore-mode
+                gitlab
+                go-mode
+                google-this
+                groovy-mode
+                grunt
+                hcl-mode
+                homebrew-mode
+                ini-mode
+                iodine-theme
+                ipcalc
+                irfc
+                jq-mode
+                js-auto-beautify
+                js-auto-format-mode
+                js-doc
+                js-format
+                js-import
+                js2-highlight-vars
+                js2-refactor
+                js3-mode
+                json-navigator
+                json-reformat
+                jss
+                jst
+                kubernetes-tramp
+                launchctl
+                ldap-mode
+                legalese
+                lice
+                logstash-conf
+                markdown-mode
+                markdown-mode+
+                markdown-preview-eww
+                markdown-preview-mode
+                markdown-toc
+                mocha
+                mocha-snippets
+                mocker
+                nodejs-repl
+                npm-mode
+                osx-browse
+                osx-clipboard
+                osx-lib
+                osx-plist
+                package-build
+                pbcopy
+                php-mode
+                php-refactor-mode
+                phpunit
+                pug-mode
+                puppet-mode
+                s
+                shut-up
+                systemd
+                terraform-mode
+                twilight-anti-bright-theme
+                twilight-theme
+                vagrant
+                x509-mode
+                xcode-mode
+                xcode-project
+                xterm-color
+                xterm-title
+                yaml-mode
+                ))
+
+
+;;; ----- INDENTATION and PROGRAMMING
+
+(setq-default indent-tabs-mode nil)
+(setq-default size-indication-mode t)
+
 (setq-default tab-width 2)
-(setq-default c-basic-offset tab-width)
+
+(setq-default apache-indent-level tab-width)
 (setq-default c-basic-indent tab-width)
+(setq-default c-basic-offset tab-width)
+(setq-default freeradius-indent-offset tab-width)
+(setq-default js-indent-level tab-width)
+(setq-default sh-basic-offset tab-width)
+(setq-default sh-indentation tab-width)
+(setq-default web-mode-code-indent-offset tab-width)
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+
 ;; set this in all c-based programming modes
 (add-hook 'c-mode-common-hook
           (lambda ()
             (c-set-offset 'case-label '+)))
 
-(add-hook 'php-mode-hook #'(lambda() (setq c-basic-offset 2)))
+(add-hook 'php-mode-hook (lambda() (setq c-basic-offset 2)))
 (defvaralias 'cperl-indent-level 'tab-width)
-;; keep this last
-(load custom-file)
+
+;;; ----- BACKUP FILES
 
 ;; save backup files under ~/.saves, with versioning
 ;; https://www.emacswiki.org/emacs/BackupDirectory
@@ -65,17 +226,8 @@
     `(("." . "~/.saves/"))    ; don't litter my fs tree
    )
 
-(add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+;;; ----- ORG-MODE
 
-(unless (and (fboundp 'server-running-p)
-             (server-running-p))
-  (server-start))
-
-
-
-(put 'downcase-region 'disabled nil)
-
-;;; org-mode setup
 ;;; https://orgmode.org/worg/org-tutorials/orgtutorial_dto.html
 ;;; http://pragmaticemacs.com/emacs/org-mode-basics-vi-a-simple-todo-list/
 ;;; http://doc.norang.ca/org-mode.html
@@ -108,3 +260,16 @@
 (setq org-capture-templates
       '(("t" "todo" entry (file+headline default-agenda-file "Tasks")
          "* TODO [#A] %?")))
+
+;;; ----- SERVER
+
+(setq server-name user-login-name)
+
+(unless (and (fboundp 'server-running-p)
+             (server-running-p))
+  (server-start))
+
+
+
+;; keep this last
+(load custom-file)
