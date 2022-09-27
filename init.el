@@ -202,7 +202,10 @@
 (setq-default sh-indentation tab-width)
 (setq-default web-mode-code-indent-offset tab-width)
 
-(add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'"     . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.js.yml\\'" . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.vm\\'"     . html-mode))
+(add-to-list 'auto-mode-alist '("\\.vm.yml\\'" . html-mode))
 
 ;; set this in all c-based programming modes
 (add-hook 'c-mode-common-hook
@@ -269,6 +272,16 @@
              (server-running-p))
   (server-start))
 
+
+;;; ----- Velocity Template Library
+;;; from https://cwiki.apache.org/confluence/display/velocity/EmacsVtlMode
+
+(add-to-list 'load-path "~/.emacs.d/packages/")
+(load-library "vtl")
+(autoload 'turn-on-vtl-mode "vtl" nil t)
+(add-hook 'html-mode-hook 'turn-on-vtl-mode t nil)
+(add-hook 'xml-mode-hook 'turn-on-vtl-mode t nil)
+(add-hook 'text-mode-hook 'turn-on-vtl-mode t nil)
 
 
 ;; keep this last
