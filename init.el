@@ -266,10 +266,11 @@
 
 ;;; ----- SERVER
 
-(setq server-name user-login-name)
+(setq server-name "none")
 
-(unless (and (fboundp 'server-running-p)
-             (server-running-p))
+(when (not (or (fboundp 'server-running-p)
+               (not window-system)))
+  (setq server-name user-login-name)
   (server-start))
 
 
