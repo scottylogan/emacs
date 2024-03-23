@@ -40,6 +40,26 @@
 (when (window-system)
   (load-theme 'tango-dark))
 
+(put 'downcase-region 'disabled nil)
+
+(tool-bar-mode -1)
+(tooltip-mode -1)
+(column-number-mode)
+
+(when (not window-system)
+  (menu-bar-mode -1))
+
+
+;;; ----- GLOBAL KEY MAPPING
+
+(global-set-key (kbd "s-n") #'scotty-new-empty-frame)
+(global-set-key (kbd "s-r") #'replace-string)
+
+
+;;; ----- FRAMES
+
+(setq frame-title-format "%f")
+
 (defun scotty-frame-setup (&optional frame)
   "Configure new frames."
   (when (and (eq system-type 'darwin) (eq window-system 'ns))
@@ -97,7 +117,6 @@
 (add-to-list 'package-archives (cons "melpa" "https://melpa.org/packages/") t)
 
 (package-initialize)
-
 
 (when (not (package-installed-p 'use-package))
   (package-install 'use-package))
@@ -194,8 +213,6 @@
 (use-package xcode-project
   :if (eq system-type 'darwin))
 
-
-
 ;;; ----- INDENTATION and PROGRAMMING
 
 (setq-default indent-tabs-mode nil)
@@ -212,13 +229,18 @@
 (setq-default sh-indentation tab-width)
 (setq-default web-mode-code-indent-offset tab-width)
 
-(add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'"     . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.js.yml\\'" . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.vm\\'"     . html-mode))
+(add-to-list 'auto-mode-alist '("\\.vm.yml\\'" . html-mode))
 
 ;; set this in all c-based programming modes
 (add-hook 'c-mode-common-hook
           (lambda ()
             (c-set-offset 'case-label '+)))
 
+(add-hook 'php-mode-hook (lambda() (setq c-basic-offset 2)))
+(defvaralias 'cperl-indent-level 'tab-width)
 
 ;;; ----- BACKUP FILES
 
@@ -242,6 +264,7 @@
 
 ;; set key for agenda
 (global-set-key (kbd "C-c a") 'org-agenda)
+(define-key global-map (kbd "C-c c") 'org-capture)
 
 ;; file to save todo items
 (setq default-agenda-dir "~/Dropbox/org-mode")
@@ -271,15 +294,21 @@
 
 ;;; ----- SERVER
 
-(setq server-name user-login-name)
+(setq server-name "none")
 
-(when (window-system)
-      (unless (and (fboundp 'server-running-p)
-                   (server-running-p))
-        (server-start)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+(when (not (or (fboundp 'server-running-p)
+               (not window-system)))
+  (setq server-name user-login-name)
+  (server-start))
+
+
+;;; ----- Velocity Template Library
+;;; from https://cwiki.apache.org/confluence/display/velocity/EmacsVtlMode
+
+;;;(add-to-list 'load-path "~/.emacs.d/packages/")
+;;;(load-library "vtl")
+;;;(autoload 'turn-on-vtl-mode "vtl" nil t)
+;;;(add-hook 'html-mode-hook 'turn-on-vtl-mode t nil)
+;;;(add-hook 'xml-mode-hook 'turn-on-vtl-mode t nil)
+;;;(add-hook 'text-mode-hook 'turn-on-vtl-mode t nil)
+
