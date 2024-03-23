@@ -5,3 +5,8 @@ elpa/
 network-security.data
 .cask/
 transient/
+eln-cache/
+url/
+games/
+.last-package-update-day
+.org-id-locations
