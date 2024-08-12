@@ -1,8 +1,13 @@
 auto-save-list/
 var/
-*.elc
 elpa/
-network-security.data
 .cask/
 transient/
+eln-cache/
+url/
+games/
 freeradius-mode/
+*.elc
+network-security.data
+.last-package-update-day
+.org-id-locations
