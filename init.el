@@ -1,23 +1,57 @@
 ;;; ----- GENERIC SETTINGS
 (setq default-directory "~/")
-(setq custom-file "~/.emacs.d/custom.el")
+;;;(setq custom-file "~/.emacs.d/custom.el")
 (setq inhibit-splash-screen t)
 
-(put 'downcase-region 'disabled nil)
-
-(tool-bar-mode -1)
-(tooltip-mode -1)
+; show colum number in mode line
 (column-number-mode)
 
+; add newlines automatically at the end of files
+(setq require-final-newline t)
+
+; highlight trailing spaces
+(setq show-trailing-whitespace t)
+
+; highlight end of buffer
+(setq-default indicate-empty-lines t)
+
+
+; kill-line (C-k) kill whole line inc. newline, when used at the beginning of a line
+(setq kill-whole-line t)
+
+; disable tool bar and tooltips
+(tool-bar-mode -1)
+(tooltip-mode -1)
+
+; disable menu bar when running in a terminal
 (when (not window-system)
   (menu-bar-mode -1))
+
+; enable downcase-region function (C-x C-l)
+(put 'downcase-region 'disabled nil)
+
+; disable double spaces at sentence ends
+(setq sentence-end-double-space nil)
+
+
+;;; ----- BACKUPS AND AUTOSAVE
+
+;; from https://idiomdrottning.org/bad-emacs-defaults
+
+(make-directory "~/.emacs_backups/" t)
+(make-directory "~/.emacs_autosave/" t)
+(setq auto-save-file-name-transforms '((".*" "~/.emacs_autosave/" t)))
+(setq backup-directory-alist '(("." . "~/.emacs_backups/")))
+(setq backup-by-copying t)
+
 
 
 ;;; ----- GLOBAL KEY MAPPING
 
 (global-set-key (kbd "s-n") #'scotty-new-empty-frame)
 (global-set-key (kbd "s-r") #'replace-string)
-
+(global-set-key [(control h)] 'delete-backward-char)
+;(keyboard-translate ?\C-h ?\C-?)
 
 ;;; ----- FRAMES
 
@@ -27,7 +61,7 @@
   "Configure new frames."
   (when (and (eq system-type 'darwin) (eq window-system 'ns))
     ;; default Latin font
-    (set-face-attribute 'default frame :family "SF Mono")
+    (set-face-attribute 'default frame :family "Iosevka Slab")
     (set-face-attribute 'default frame :height
                         (cond ((< (display-pixel-height) 1080) 160)
                               ((>= (display-pixel-height) 2160) 300)
@@ -56,9 +90,13 @@
               '(
                 "~/bin/"
                 "/usr/local/bin"
+                "/opt/homebrew/bin"
+                "/opt/local/bin"
                 "/usr/bin"
                 "/bin"
                 "/usr/local/sbin"
+                "/opt/homebrew/sbin"
+                "/opt/local/sbin"
                 "/usr/sbin"
                 "/sbin"
                 "/Applications/Emacs.app/Contents/MacOS/bin-x86_64-10_14"
@@ -69,122 +107,105 @@
 
 ;;; ----- PACKAGES
 
-(require 'package)
+;;; ----- straight.el package manager
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-(add-to-list 'package-archives (cons "melpa" "https://melpa.org/packages/") t)
+(setq straight-use-package-by-default t)
+(straight-use-package 'use-package)
 
-(package-initialize)
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
 
-(setq-default package-selected-packages
-              '(
-                ac-html
-                ac-html-bootstrap
-                ac-js2
-                ac-php
-                ac-php-core
-                ansi
-                apache-mode
-                apt-sources-list
-                cask
-                cask-mode
-                commander
-                composer
-                dash
-                dayone
-                docker
-                dockerfile-mode
-                egg
-                epl
-                f
-                feature-mode
-                flymake-jshint
-                flymake-jslint
-                flymake-json
-                flymake-php
-                flymake-phpcs
-                flymake-puppet
-                flymake-shell
-                flymake-yaml
-                fold-this
-                fontawesome
-                freeradius-mode
-                gist
-                git
-                git-timemachine
-                gitattributes-mode
-                gitconfig
-                gitconfig-mode
-                github-browse-file
-                github-clone
-                github-issues
-                github-theme
-                gitignore-mode
-                gitlab
-                go-mode
-                google-this
-                groovy-mode
-                grunt
-                hcl-mode
-                homebrew-mode
-                ini-mode
-                iodine-theme
-                ipcalc
-                irfc
-                jq-mode
-                js-auto-beautify
-                js-auto-format-mode
-                js-doc
-                js-format
-                js-import
-                js2-highlight-vars
-                js2-refactor
-                js3-mode
-                json-navigator
-                json-reformat
-                jss
-                jst
-                kubernetes-tramp
-                launchctl
-                ldap-mode
-                legalese
-                lice
-                logstash-conf
-                markdown-mode
-                markdown-mode+
-                markdown-preview-eww
-                markdown-preview-mode
-                markdown-toc
-                mocha
-                mocha-snippets
-                mocker
-                nodejs-repl
-                npm-mode
-                osx-browse
-                osx-clipboard
-                osx-lib
-                osx-plist
-                package-build
-                pbcopy
-                php-mode
-                php-refactor-mode
-                phpunit
-                pug-mode
-                puppet-mode
-                s
-                shut-up
-                systemd
-                terraform-mode
-                twilight-anti-bright-theme
-                twilight-theme
-                vagrant
-                x509-mode
-                xcode-mode
-                xcode-project
-                xterm-color
-                xterm-title
-                yaml-mode
-                ))
+(use-package auto-package-update
+  :config
+  (setq auto-package-update-delete-old-versions t)
+  (setq auto-package-update-hide-results t)
+  (auto-package-update-maybe))
 
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+
+(use-package company)
+
+(add-hook 'after-init-hook 'global-company-mode)
+
+;; build dependency tree for function
+(use-package lsp-mode
+    :ensure t
+    :hook ((go-mode . lsp)
+           (c-mode . lsp)
+           (c++-mode . lsp))
+    :commands lsp)
+(setq lsp-warn-no-matched-clients nil)
+
+(use-package lsp-ui)
+(use-package ansi)
+(use-package apache-mode)
+(use-package apt-sources-list)
+(use-package cask)
+(use-package cask-mode)
+(use-package dayone)
+(use-package docker)
+(use-package s)
+(use-package dockerfile-mode)
+(use-package flymake-jshint)
+(use-package flymake-json)
+(use-package flymake-puppet)
+(use-package flymake-shell)
+(use-package flymake-yaml)
+(use-package fontawesome)
+(use-package freeradius-mode)
+(use-package gist)
+(use-package git)
+(use-package go-mode)
+(use-package hcl-mode)
+(use-package homebrew-mode)
+(use-package ini-mode)
+(use-package ipcalc)
+(use-package jq-mode)
+(use-package js-doc)
+(use-package launchctl)
+(use-package ldap-mode)
+(use-package legalese)
+(use-package markdown-mode)
+(use-package markdown-toc)
+(use-package mocha)
+(use-package nodejs-repl)
+(use-package npm-mode)
+(use-package osx-browse)
+(use-package osx-clipboard)
+(use-package osx-lib)
+(use-package osx-plist)
+(use-package package-build)
+(use-package pbcopy)
+(use-package pug-mode)
+(use-package puppet-mode)
+(use-package systemd)
+(use-package terraform-mode)
+(use-package vagrant)
+(use-package x509-mode)
+;;;(use-package xcode-mode)
+(use-package xcode-project)
+(use-package xterm-color)
+;;(use-package xterm-title)
+(use-package yaml-mode)
 
 ;;; ----- INDENTATION and PROGRAMMING
 
@@ -285,5 +306,14 @@
 (add-hook 'text-mode-hook 'turn-on-vtl-mode t nil)
 
 
+;;; other things that might be interesting
+;;;
+;;; https://github.com/lewang/ws-butler
+;;;
+;;; https://github.com/emacscollective/no-littering
+;;;
+;;; display-line-numbers, display-line-numbers-mode,
+;;; and global-display-line-numbers-mode
+
 ;; keep this last
-(load custom-file)
+;;;(load custom-file)
