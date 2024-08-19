@@ -2,9 +2,11 @@
 (setq default-directory "~/")
 ;;;(setq custom-file "~/.emacs.d/custom.el")
 (setq inhibit-splash-screen t)
+(setq-default display-line-numbers t)
 
 ; show colum number in mode line
 (column-number-mode)
+(scroll-bar-mode -1)
 
 ; add newlines automatically at the end of files
 (setq require-final-newline t)
@@ -45,6 +47,8 @@
 (setq backup-by-copying t)
 
 
+(add-to-list 'default-frame-alist '(height . 38))
+(add-to-list 'default-frame-alist '(width . 160))
 
 ;;; ----- GLOBAL KEY MAPPING
 
@@ -53,6 +57,10 @@
 (global-set-key [(control h)] 'delete-backward-char)
 ;(keyboard-translate ?\C-h ?\C-?)
 
+(when (window-system)
+  (load-theme 'tango-dark))
+
+
 ;;; ----- FRAMES
 
 (setq frame-title-format "%f")
@@ -60,13 +68,20 @@
 (defun scotty-frame-setup (&optional frame)
   "Configure new frames."
   (when (and (eq system-type 'darwin) (eq window-system 'ns))
+    (set-face-foreground 'mode-line "black")
+    (set-face-background 'mode-line "orange")
+    (set-face-foreground 'mode-line-inactive "gray")
+    (set-face-background 'mode-line-inactive "graphite")
+
     ;; default Latin font
-    (set-face-attribute 'default frame :family "Iosevka Slab")
-    (set-face-attribute 'default frame :height
-                        (cond ((< (display-pixel-height) 1080) 160)
-                              ((>= (display-pixel-height) 2160) 300)
-                              (t 220)))))
-  
+    (set-face-attribute 'default frame
+                        :family "Iosevka Slab"
+                        :slant 'normal
+                        :height (cond ((< (display-pixel-height) 1080) 160)
+                                      ((>= (display-pixel-height) 2160) 300)
+                                      (t 220)))))
+
+
 (if (daemonp)
     (add-hook 'after-make-frame-functions
               (lambda (frame)
@@ -130,12 +145,6 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
-(use-package auto-package-update
-  :config
-  (setq auto-package-update-delete-old-versions t)
-  (setq auto-package-update-hide-results t)
-  (auto-package-update-maybe))
-
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode))
@@ -175,6 +184,46 @@
 (use-package gist)
 (use-package git)
 (use-package go-mode)
+
+(when (not (package-installed-p 'use-package))
+  (package-install 'use-package))
+
+(when (not (package-installed-p 'bind-key))
+  (package-install 'bind-key))
+
+(eval-when-compile
+  (require 'use-package))
+(require 'bind-key)                ;; if you use any :bind variant
+
+(custom-set-variables
+ '(use-package-always-ensure t))
+
+(use-package auto-package-update
+  :custom
+  (auto-package-update-interval 7)
+  (auto-package-update-prompt-before-update t)
+  (auto-package-update-hide-results t)
+  :config
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "09:00"))
+
+;;;(use-package vertico
+;;;  :ensure t
+;;;  :init
+;;;  (vertico-mode))
+
+(use-package bison-mode)
+(use-package ebnf-mode)
+(use-package git-modes)
+(use-package git-timemachine)
+(use-package github-clone)
+(use-package github-explorer)
+(use-package gitlab)
+(use-package gitlab-ci-mode)
+(use-package gitlab-ci-mode-flycheck)
+(use-package gitlab-pipeline)
+(use-package google-this)
+(use-package haskell-mode)
 (use-package hcl-mode)
 (use-package homebrew-mode)
 (use-package ini-mode)
@@ -195,6 +244,26 @@
 (use-package osx-plist)
 (use-package package-build)
 (use-package pbcopy)
+(use-package jq-format)
+(use-package js2-mode)
+(use-package json-mode)
+;;;(use-package json-navigator)
+(use-package legalese)                  ; License file stuff
+(use-package lex)
+(use-package lice)                      ; License and Header Template
+(use-package magit)
+(use-package magit-vcsh)
+(use-package magithub)
+(use-package makefile-executor)
+(use-package md-readme)
+(use-package memory-usage)
+(use-package mermaid-docker-mode)
+(use-package mermaid-mode)
+(use-package nasm-mode)
+(use-package nhexl-mode)
+(use-package npm)
+(use-package powerline)
+(use-package projectile)
 (use-package pug-mode)
 (use-package puppet-mode)
 (use-package systemd)
@@ -206,6 +275,18 @@
 (use-package xterm-color)
 ;;(use-package xterm-title)
 (use-package yaml-mode)
+
+
+(use-package osx-browse
+  :if (eq system-type 'darwin))
+(use-package osx-clipboard
+  :if (eq system-type 'darwin))
+(use-package osx-lib
+  :if (eq system-type 'darwin))
+(use-package osx-plist
+  :if (eq system-type 'darwin))
+(use-package xcode-project
+  :if (eq system-type 'darwin))
 
 ;;; ----- INDENTATION and PROGRAMMING
 
@@ -298,13 +379,12 @@
 ;;; ----- Velocity Template Library
 ;;; from https://cwiki.apache.org/confluence/display/velocity/EmacsVtlMode
 
-(add-to-list 'load-path "~/.emacs.d/packages/")
-(load-library "vtl")
-(autoload 'turn-on-vtl-mode "vtl" nil t)
-(add-hook 'html-mode-hook 'turn-on-vtl-mode t nil)
-(add-hook 'xml-mode-hook 'turn-on-vtl-mode t nil)
-(add-hook 'text-mode-hook 'turn-on-vtl-mode t nil)
-
+;;;(add-to-list 'load-path "~/.emacs.d/packages/")
+;;;(load-library "vtl")
+;;;(autoload 'turn-on-vtl-mode "vtl" nil t)
+;;;(add-hook 'html-mode-hook 'turn-on-vtl-mode t nil)
+;;;(add-hook 'xml-mode-hook 'turn-on-vtl-mode t nil)
+;;;(add-hook 'text-mode-hook 'turn-on-vtl-mode t nil)
 
 ;;; other things that might be interesting
 ;;;
