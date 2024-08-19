@@ -6,3 +6,5 @@ network-security.data
 .cask/
 transient/
 freeradius-mode/
+.lsp-session-v1
+straight/
