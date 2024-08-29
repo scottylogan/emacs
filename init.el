@@ -368,13 +368,10 @@
 
 ;;; ----- SERVER
 
-(setq server-name "none")
+(setq server-name user-login-name)
 
-(when (not (or (fboundp 'server-running-p)
-               (not window-system)))
-  (setq server-name user-login-name)
+(when (and (window-system) (not (server-running-p)))
   (server-start))
-
 
 ;;; ----- Velocity Template Library
 ;;; from https://cwiki.apache.org/confluence/display/velocity/EmacsVtlMode
