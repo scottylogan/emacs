@@ -1,8 +1,9 @@
 ;;; ----- GENERIC SETTINGS
 (setq default-directory "~/")
-;;;(setq custom-file "~/.emacs.d/custom.el")
 (setq inhibit-splash-screen t)
 (setq-default display-line-numbers t)
+
+(load-file (expand-file-name "elpaca.el" user-emacs-directory))
 
 ; show colum number in mode line
 (column-number-mode)
@@ -122,38 +123,15 @@
 
 ;;; ----- PACKAGES
 
-;;; ----- straight.el package manager
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name
-        "straight/repos/straight.el/bootstrap.el"
-        (or (bound-and-true-p straight-base-dir)
-            user-emacs-directory)))
-      (bootstrap-version 7))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-(setq straight-use-package-by-default t)
-(straight-use-package 'use-package)
-
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
-
 (use-package flycheck
   :ensure t
+  :defer t
   :init (global-flycheck-mode))
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
-
-(use-package company)
-
-(add-hook 'after-init-hook 'global-company-mode)
+(use-package company
+  :ensure t
+  :defer t
+  :init (global-company-mode))
 
 ;; build dependency tree for function
 (use-package lsp-mode
@@ -164,129 +142,110 @@
     :commands lsp)
 (setq lsp-warn-no-matched-clients nil)
 
-(use-package lsp-ui)
-(use-package ansi)
-(use-package apache-mode)
-(use-package apt-sources-list)
-(use-package cask)
-(use-package cask-mode)
-(use-package dayone)
-(use-package docker)
-(use-package s)
-(use-package dockerfile-mode)
-(use-package flymake-jshint)
-(use-package flymake-json)
-(use-package flymake-puppet)
-(use-package flymake-shell)
-(use-package flymake-yaml)
-(use-package fontawesome)
-(use-package freeradius-mode)
-(use-package gist)
-(use-package git)
-(use-package go-mode)
+(use-package lsp-ui :ensure t)
+(use-package ansi :ensure t)
 
-(when (not (package-installed-p 'use-package))
-  (package-install 'use-package))
+(use-package apache-mode :ensure t)
+(use-package apt-sources-list :defer t)
 
-(when (not (package-installed-p 'bind-key))
-  (package-install 'bind-key))
+(use-package cask-mode :ensure t)
+(use-package docker :ensure t)
+;;;(use-package s)
+(use-package dockerfile-mode :ensure t)
+(use-package fontawesome :ensure t)
 
-(eval-when-compile
-  (require 'use-package))
-(require 'bind-key)                ;; if you use any :bind variant
+(use-package freeradius-mode :ensure t)
+(use-package go-mode :ensure t)
 
-(custom-set-variables
- '(use-package-always-ensure t))
-
-(use-package auto-package-update
-  :custom
-  (auto-package-update-interval 7)
-  (auto-package-update-prompt-before-update t)
-  (auto-package-update-hide-results t)
-  :config
-  (auto-package-update-maybe)
-  (auto-package-update-at-time "09:00"))
 
 ;;;(use-package vertico
 ;;;  :ensure t
 ;;;  :init
 ;;;  (vertico-mode))
 
-(use-package bison-mode)
-(use-package ebnf-mode)
-(use-package git-modes)
-(use-package git-timemachine)
-(use-package github-clone)
-(use-package github-explorer)
-(use-package gitlab)
-(use-package gitlab-ci-mode)
-(use-package gitlab-ci-mode-flycheck)
-(use-package gitlab-pipeline)
-(use-package google-this)
-(use-package haskell-mode)
-(use-package hcl-mode)
-(use-package homebrew-mode)
-(use-package ini-mode)
-(use-package ipcalc)
-(use-package jq-mode)
-(use-package js-doc)
-(use-package launchctl)
-(use-package ldap-mode)
-(use-package legalese)
-(use-package markdown-mode)
-(use-package markdown-toc)
-(use-package mocha)
-(use-package nodejs-repl)
-(use-package npm-mode)
-(use-package osx-browse)
-(use-package osx-clipboard)
-(use-package osx-lib)
-(use-package osx-plist)
-(use-package package-build)
-(use-package pbcopy)
-(use-package jq-format)
-(use-package js2-mode)
-(use-package json-mode)
-;;;(use-package json-navigator)
-(use-package legalese)                  ; License file stuff
-(use-package lex)
-(use-package lice)                      ; License and Header Template
-(use-package magit)
-(use-package magit-vcsh)
-(use-package magithub)
-(use-package makefile-executor)
-(use-package md-readme)
-(use-package memory-usage)
-(use-package mermaid-docker-mode)
-(use-package mermaid-mode)
-(use-package nasm-mode)
-(use-package nhexl-mode)
-(use-package npm)
-(use-package powerline)
-(use-package projectile)
-(use-package pug-mode)
-(use-package puppet-mode)
-(use-package systemd)
-(use-package terraform-mode)
-(use-package vagrant)
-(use-package x509-mode)
-;;;(use-package xcode-mode)
-(use-package xcode-project)
-(use-package xterm-color)
-;;(use-package xterm-title)
-(use-package yaml-mode)
+(use-package bison-mode :ensure t)
+(use-package ebnf-mode :ensure t)
+(use-package google-this :ensure t)
+(use-package haskell-mode :ensure t)
+;;;(use-package homebrew-mode :ensure t)
+(use-package ini-mode :ensure t)
+(use-package ipcalc :ensure t)
+(use-package launchctl :ensure t)
+(use-package legalese :ensure t)
+(use-package markdown-mode :ensure t)
+(use-package markdown-toc :ensure t)
+
+;;; Node / Javascript
+(use-package mocha :ensure t)
+(use-package nodejs-repl :ensure t)
+(use-package npm-mode :ensure t)
+(use-package jq-mode :ensure t)
+(use-package js-doc :ensure t)
+(use-package jq-format :ensure t)
+(use-package js2-mode :ensure t)
+(use-package json-mode :ensure t)
+(use-package npm :ensure t)
+
+;;;(use-package json-navigator :ensure t)
+
+;;; Git
+(elpaca magit :ensure t)
+(elpaca magit-vcsh :ensure t)
+(elpaca forge :ensure t)
+(elpaca gist :ensure t)
+(elpaca git :ensure t)
+(elpaca git-modes :ensure t)
+(elpaca git-timemachine :ensure t)
+;;; github
+(elpaca github-clone :ensure t)
+(elpaca github-explorer :ensure t)
+;;; gitlab
+(elpaca gitlab :ensure t)
+(elpaca gitlab-ci-mode :ensure t)
+(elpaca gitlab-ci-mode-flycheck :ensure t)
+;;;(use-package gitlab-pipeline :ensure t)
+
+;;; docs and licenses
+(elpaca lice :ensure t)                      ; License and Header Template
+(elpaca md-readme :ensure t)
+(elpaca mermaid-docker-mode :ensure t)
+(elpaca mermaid-mode :ensure t)
+
+;;;(use-package package-build)
+;;;(use-package lex)
+;;;(use-package nasm-mode)
+;;;(use-package nhexl-mode)
+;;;(use-package powerline)
+;;;(use-package projectile)
+;;;(use-package pug-mode)
+
+(elpaca memory-usage :ensure t)
 
 
-(use-package osx-browse
-  :if (eq system-type 'darwin))
-(use-package osx-clipboard
-  :if (eq system-type 'darwin))
-(use-package osx-lib
-  :if (eq system-type 'darwin))
-(use-package osx-plist
-  :if (eq system-type 'darwin))
-(use-package xcode-project
-  :if (eq system-type 'darwin))
+;;; various tools
+(elpaca makefile-executor :ensure t)
+(elpaca puppet-mode :ensure t)
+(elpaca systemd :ensure t)
+(elpaca terraform-mode :ensure t)
+(elpaca vagrant :ensure t)
+(elpaca hcl-mode :ensure t)
+
+
+(elpaca x509-mode :ensure t)
+
+(elpaca xterm-color :ensure t)
+
+(elpaca yaml-mode :ensure t)
+
+
+(when (eq system-type 'darwin)
+  (use-package osx-browse :ensure t)
+  (use-package osx-clipboard :ensure t)
+  (use-package osx-lib :ensure t)
+  (use-package osx-plist :ensure t)
+  (use-package pbcopy :ensure t)
+;;;  (use-package xcode-mode :ensure t)
+  (use-package xcode-project :ensure t))
 
 ;;; ----- INDENTATION and PROGRAMMING
 
@@ -366,8 +325,14 @@
       '(("t" "todo" entry (file+headline default-agenda-file "Tasks")
          "* TODO [#A] %?")))
 
+;;; ActivityWatch app helper
+(use-package activity-watch-mode
+  :ensure t
+  :init (global-activity-watch-mode))
+
 ;;; ----- SERVER
 
+(require 'server)
 (setq server-name user-login-name)
 
 (when (and (window-system) (not (server-running-p)))
@@ -392,5 +357,3 @@
 ;;; display-line-numbers, display-line-numbers-mode,
 ;;; and global-display-line-numbers-mode
 
-;; keep this last
-;;;(load custom-file)
