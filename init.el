@@ -189,27 +189,27 @@
 ;;;(use-package json-navigator :ensure t)
 
 ;;; Git
-(elpaca magit :ensure t)
-(elpaca magit-vcsh :ensure t)
-(elpaca forge :ensure t)
-(elpaca gist :ensure t)
-(elpaca git :ensure t)
-(elpaca git-modes :ensure t)
-(elpaca git-timemachine :ensure t)
+(use-package magit :ensure t)
+(use-package magit-vcsh :ensure t)
+(use-package forge :ensure t)
+(use-package gist :ensure t)
+(use-package git :ensure t)
+(use-package git-modes :ensure t)
+(use-package git-timemachine :ensure t)
 ;;; github
-(elpaca github-clone :ensure t)
-(elpaca github-explorer :ensure t)
+(use-package github-clone :ensure t)
+(use-package github-explorer :ensure t)
 ;;; gitlab
-(elpaca gitlab :ensure t)
-(elpaca gitlab-ci-mode :ensure t)
-(elpaca gitlab-ci-mode-flycheck :ensure t)
+(use-package gitlab :ensure t)
+(use-package gitlab-ci-mode :ensure t)
+(use-package gitlab-ci-mode-flycheck :ensure t)
 ;;;(use-package gitlab-pipeline :ensure t)
 
 ;;; docs and licenses
-(elpaca lice :ensure t)                      ; License and Header Template
-(elpaca md-readme :ensure t)
-(elpaca mermaid-docker-mode :ensure t)
-(elpaca mermaid-mode :ensure t)
+(use-package lice :ensure t)                      ; License and Header Template
+(use-package md-readme :ensure t)
+(use-package mermaid-docker-mode :ensure t)
+(use-package mermaid-mode :ensure t)
 
 ;;;(use-package package-build)
 ;;;(use-package lex)
@@ -219,23 +219,23 @@
 ;;;(use-package projectile)
 ;;;(use-package pug-mode)
 
-(elpaca memory-usage :ensure t)
+(use-package memory-usage :ensure t)
 
 
 ;;; various tools
-(elpaca makefile-executor :ensure t)
-(elpaca puppet-mode :ensure t)
-(elpaca systemd :ensure t)
-(elpaca terraform-mode :ensure t)
-(elpaca vagrant :ensure t)
-(elpaca hcl-mode :ensure t)
+(use-package makefile-executor :ensure t)
+(use-package puppet-mode :ensure t)
+(use-package systemd :ensure t)
+(use-package terraform-mode :ensure t)
+(use-package vagrant :ensure t)
+(use-package hcl-mode :ensure t)
 
 
-(elpaca x509-mode :ensure t)
+(use-package x509-mode :ensure t)
 
-(elpaca xterm-color :ensure t)
+(use-package xterm-color :ensure t)
 
-(elpaca yaml-mode :ensure t)
+(use-package yaml-mode :ensure t)
 
 
 (when (eq system-type 'darwin)
