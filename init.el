@@ -1,7 +1,9 @@
-;;; ----- GENERIC SETTINGS
+; ----- GENERIC SETTINGS
 (setq default-directory "~/")
 (setq inhibit-splash-screen t)
-(setq-default display-line-numbers t)
+
+; show line numbers in wide windows
+(setq-default display-line-numbers (> (frame-width) 80))
 
 (load-file (expand-file-name "elpaca.el" user-emacs-directory))
 
@@ -37,32 +39,48 @@
 (setq sentence-end-double-space nil)
 
 
-;;; ----- BACKUPS AND AUTOSAVE
+; ----- BACKUPS AND AUTOSAVE
 
-;; from https://idiomdrottning.org/bad-emacs-defaults
+; from https://idiomdrottning.org/bad-emacs-defaults
 
-(make-directory "~/.emacs_backups/" t)
+; put auto-saved files under ~/.emacs_autosave
 (make-directory "~/.emacs_autosave/" t)
 (setq auto-save-file-name-transforms '((".*" "~/.emacs_autosave/" t)))
+
+; save backup files under ~/.emacs_backups, with versioning
+; https://www.emacswiki.org/emacs/BackupDirectory
+
+(make-directory "~/.emacs_backups/" t)
 (setq backup-directory-alist '(("." . "~/.emacs_backups/")))
-(setq backup-by-copying t)
+
+(setq  backup-by-copying t      ; don't clobber symlinks
+       version-control t        ; use versioned backups
+       delete-old-versions t
+       kept-new-versions 6
+       kept-old-versions 2)
 
 
-(add-to-list 'default-frame-alist '(height . 38))
-(add-to-list 'default-frame-alist '(width . 160))
 
-;;; ----- GLOBAL KEY MAPPING
+; ----- GLOBAL KEY MAPPING
 
 (global-set-key (kbd "s-n") #'scotty-new-empty-frame)
 (global-set-key (kbd "s-r") #'replace-string)
+(global-set-key (kbd "s-R") #'replace-regexp)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
 (global-set-key [(control h)] 'delete-backward-char)
-;(keyboard-translate ?\C-h ?\C-?)
+(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+(global-set-key (kbd "C-r") 'isearch-backward-regexp)
+(global-set-key (kbd "C-M-s") 'isearch-forward)
+(global-set-key (kbd "C-M-r") 'isearch-backward)
 
 (when (window-system)
   (load-theme 'tango-dark))
 
 
 ;;; ----- FRAMES
+
+(add-to-list 'default-frame-alist '(height . 38))
+(add-to-list 'default-frame-alist '(width . 160))
 
 (setq frame-title-format "%f")
 
@@ -191,7 +209,7 @@
 ;;; Git
 (use-package magit :ensure t)
 (use-package magit-vcsh :ensure t)
-(use-package forge :ensure t)
+;;;(use-package forge :ensure t)
 (use-package gist :ensure t)
 (use-package git :ensure t)
 (use-package git-modes :ensure t)
@@ -223,7 +241,7 @@
 
 
 ;;; various tools
-(use-package makefile-executor :ensure t)
+;;;(use-package makefile-executor :ensure t)
 (use-package puppet-mode :ensure t)
 (use-package systemd :ensure t)
 (use-package terraform-mode :ensure t)
@@ -273,23 +291,6 @@
           (lambda ()
             (c-set-offset 'case-label '+)))
 
-(add-hook 'php-mode-hook (lambda() (setq c-basic-offset 2)))
-(defvaralias 'cperl-indent-level 'tab-width)
-
-;;; ----- BACKUP FILES
-
-;; save backup files under ~/.saves, with versioning
-;; https://www.emacswiki.org/emacs/BackupDirectory
-(setq
-   backup-by-copying t      ; don't clobber symlinks
-   version-control t        ; use versioned backups
-   delete-old-versions t
-   kept-new-versions 6
-   kept-old-versions 2
-   backup-directory-alist
-    `(("." . "~/.saves/"))    ; don't litter my fs tree
-   )
-
 ;;; ----- ORG-MODE
 
 ;;; https://orgmode.org/worg/org-tutorials/orgtutorial_dto.html
@@ -337,16 +338,6 @@
 
 (when (and (window-system) (not (server-running-p)))
   (server-start))
-
-;;; ----- Velocity Template Library
-;;; from https://cwiki.apache.org/confluence/display/velocity/EmacsVtlMode
-
-;;;(add-to-list 'load-path "~/.emacs.d/packages/")
-;;;(load-library "vtl")
-;;;(autoload 'turn-on-vtl-mode "vtl" nil t)
-;;;(add-hook 'html-mode-hook 'turn-on-vtl-mode t nil)
-;;;(add-hook 'xml-mode-hook 'turn-on-vtl-mode t nil)
-;;;(add-hook 'text-mode-hook 'turn-on-vtl-mode t nil)
 
 ;;; other things that might be interesting
 ;;;
