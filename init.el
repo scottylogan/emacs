@@ -1,77 +1,118 @@
-; ----- GENERIC SETTINGS
+;; elpaca
+(defvar elpaca-installer-version 0.7)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                 ,@(when-let ((depth (plist-get order :depth)))
+                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                 ,(plist-get order :repo) ,repo))))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable use-package :ensure support for Elpaca.
+  (elpaca-use-package-mode))
+
+;; ----- GENERIC SETTINGS
 (setq default-directory "~/")
 (setq inhibit-splash-screen t)
 
-; show line numbers in wide windows
+;; show line numbers in wide windows
 (setq-default display-line-numbers (> (frame-width) 80))
 
-(load-file (expand-file-name "elpaca.el" user-emacs-directory))
-
-; show colum number in mode line
+;; show colum number in mode line
 (column-number-mode)
 (scroll-bar-mode -1)
 
-; add newlines automatically at the end of files
+;; add newlines automatically at the end of files
 (setq require-final-newline t)
 
-; highlight trailing spaces
+;; highlight trailing spaces
 (setq show-trailing-whitespace t)
 
-; highlight end of buffer
+;; highlight end of buffer
 (setq-default indicate-empty-lines t)
 
 
-; kill-line (C-k) kill whole line inc. newline, when used at the beginning of a line
+;; kill-line (C-k) kill whole line inc. newline, when used at the beginning of a line
 (setq kill-whole-line t)
 
-; disable tool bar and tooltips
+;; disable tool bar and tooltips
 (tool-bar-mode -1)
 (tooltip-mode -1)
 
-; disable menu bar when running in a terminal
-(when (not window-system)
+;; disable menu bar when running in a terminal, or X
+;; but leave on for MacOS GUI Emacs
+(when (or (not window-system) (eq window-system 'x))
   (menu-bar-mode -1))
 
-; enable downcase-region function (C-x C-l)
+;; enable downcase-region function (C-x C-l)
 (put 'downcase-region 'disabled nil)
 
-; disable double spaces at sentence ends
+;; disable double spaces at sentence ends
 (setq sentence-end-double-space nil)
 
+;; ----- BACKUPS AND AUTOSAVE
 
-; ----- BACKUPS AND AUTOSAVE
+;; from https://idiomdrottning.org/bad-emacs-defaults
 
-; from https://idiomdrottning.org/bad-emacs-defaults
-
-; put auto-saved files under ~/.emacs_autosave
+;; put auto-saved files under ~/.emacs_autosave
 (make-directory "~/.emacs_autosave/" t)
 (setq auto-save-file-name-transforms '((".*" "~/.emacs_autosave/" t)))
 
-; save backup files under ~/.emacs_backups, with versioning
-; https://www.emacswiki.org/emacs/BackupDirectory
+;; save backup files under ~/.emacs_backups, with versioning
+;; https://www.emacswiki.org/emacs/BackupDirectory
 
 (make-directory "~/.emacs_backups/" t)
 (setq backup-directory-alist '(("." . "~/.emacs_backups/")))
 
-(setq  backup-by-copying t      ; don't clobber symlinks
-       version-control t        ; use versioned backups
-       delete-old-versions t
-       kept-new-versions 6
-       kept-old-versions 2)
+(setq backup-by-copying t               ; don't clobber symlinks
+      version-control t                 ; use versioned backups
+      delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2)
 
+;; ----- GLOBAL KEY MAPPING
 
-
-; ----- GLOBAL KEY MAPPING
-
-(global-set-key (kbd "s-n") #'scotty-new-empty-frame)
-(global-set-key (kbd "s-r") #'replace-string)
-(global-set-key (kbd "s-R") #'replace-regexp)
+(global-set-key (kbd "s-n")     #'scotty-new-empty-frame)
+(global-set-key (kbd "s-r")     #'replace-string)
+(global-set-key (kbd "s-R")     #'replace-regexp)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
-(global-set-key [(control h)] 'delete-backward-char)
-(global-set-key (kbd "C-s") 'isearch-forward-regexp)
-(global-set-key (kbd "C-r") 'isearch-backward-regexp)
-(global-set-key (kbd "C-M-s") 'isearch-forward)
-(global-set-key (kbd "C-M-r") 'isearch-backward)
+(global-set-key [(control h)]   'delete-backward-char)
+(global-set-key (kbd "C-s")     'isearch-forward-regexp)
+(global-set-key (kbd "C-r")     'isearch-backward-regexp)
+(global-set-key (kbd "C-M-s")   'isearch-forward)
+(global-set-key (kbd "C-M-r")   'isearch-backward)
 
 (when (window-system)
   (load-theme 'tango-dark))
@@ -81,8 +122,21 @@
 
 (add-to-list 'default-frame-alist '(height . 38))
 (add-to-list 'default-frame-alist '(width . 160))
-
 (setq frame-title-format "%f")
+
+(when (or (eq window-system 'ns) (eq window-system 'x))
+  (set-face-foreground 'mode-line "black")
+  (set-face-background 'mode-line "orange")
+  (set-face-foreground 'mode-line-inactive "gray")
+  (set-face-background 'mode-line-inactive "graphite")
+
+  ;; default Latin font
+  (set-face-attribute 'default nil
+                      :family "Iosevka Slab"
+                      :slant 'normal
+                      :height (cond ((< (display-pixel-height) 1080) 160)
+                                    ((>= (display-pixel-height) 2160) 300)
+                                    (t 220))))
 
 (defun scotty-frame-setup (&optional frame)
   "Configure new frames."
@@ -158,22 +212,53 @@
            (c-mode . lsp)
            (c++-mode . lsp))
     :commands lsp)
+(use-package lsp-ui :ensure t)
 (setq lsp-warn-no-matched-clients nil)
 
-(use-package lsp-ui :ensure t)
 (use-package ansi :ensure t)
 
 (use-package apache-mode :ensure t)
 (use-package apt-sources-list :defer t)
 
 (use-package cask-mode :ensure t)
-(use-package docker :ensure t)
+;;;(use-package docker :ensure t)
 ;;;(use-package s)
 (use-package dockerfile-mode :ensure t)
 (use-package fontawesome :ensure t)
 
 (use-package freeradius-mode :ensure t)
 (use-package go-mode :ensure t)
+(use-package go-add-tags :ensure t)
+(use-package go-autocomplete :ensure t)
+(use-package go-complete :ensure t)
+(use-package go-dlv :ensure t)
+(use-package go-eldoc :ensure t)
+(use-package go-errcheck :ensure t)
+(use-package go-expr-completion :ensure t)
+(use-package go-fill-struct :ensure t)
+(use-package go-gen-test :ensure t)
+(use-package go-guru :ensure t)
+(use-package go-imports :ensure t)
+(use-package go-playground :ensure t)
+
+(use-package arduino-cli-mode :ensure t)
+(use-package arduino-mode :ensure t)
+
+(use-package verilog-mode :ensure t)
+(use-package verilog-ts-mode :ensure t)
+(use-package hydra :ensure t)
+(use-package verilog-ext :ensure t)
+
+(use-package ansible :ensure t)
+(use-package ansible-doc :ensure t)
+(use-package flymake-ansible-lint :ensure t)
+
+
+(use-package forth-mode :ensure t)
+
+(use-package projectile :ensure t)
+(use-package go-rename :ensure t)
+(use-package go-projectile :ensure t)
 
 
 ;;;(use-package vertico
@@ -192,6 +277,11 @@
 (use-package legalese :ensure t)
 (use-package markdown-mode :ensure t)
 (use-package markdown-toc :ensure t)
+(use-package gh-md :ensure t)
+;;;(use-package jekyll-modes :ensure t)
+
+;;;(use-package copilot-chat :ensure t)
+
 
 ;;; Node / Javascript
 (use-package mocha :ensure t)
@@ -203,11 +293,13 @@
 (use-package js2-mode :ensure t)
 (use-package json-mode :ensure t)
 (use-package npm :ensure t)
+(use-package typescript-mode :ensure t)
 
 ;;;(use-package json-navigator :ensure t)
 
 ;;; Git
-(use-package magit :ensure t)
+(elpaca transient :repo "magit/transient")
+(use-package magit :ensure t :after transient)
 (use-package magit-vcsh :ensure t)
 ;;;(use-package forge :ensure t)
 (use-package gist :ensure t)
@@ -229,6 +321,20 @@
 (use-package mermaid-docker-mode :ensure t)
 (use-package mermaid-mode :ensure t)
 
+(use-package k8s-mode :ensure t)
+(use-package kubectx-mode :ensure t)
+(use-package kubedoc :ensure t)
+(use-package kubernetes :ensure t)
+
+(use-package slime :ensure t)
+(use-package slime-docker :ensure t)
+(use-package slime-repl-ansi-color :ensure t)
+
+(use-package emacsql :ensure t)
+(use-package emacsql-mysql :ensure t)
+(use-package emacsql-sqlite :ensure t)
+
+
 ;;;(use-package package-build)
 ;;;(use-package lex)
 ;;;(use-package nasm-mode)
@@ -239,12 +345,20 @@
 
 (use-package memory-usage :ensure t)
 
+(use-package flymake-shellcheck :ensure t)
+
+(use-package vterm :ensure t)
 
 ;;; various tools
 ;;;(use-package makefile-executor :ensure t)
 (use-package puppet-mode :ensure t)
+(use-package flymake-puppet :ensure t)
+(use-package puppet-ts-mode :ensure t)
+
 (use-package systemd :ensure t)
+
 (use-package terraform-mode :ensure t)
+(use-package terraform-doc :ensure t)
 (use-package vagrant :ensure t)
 (use-package hcl-mode :ensure t)
 
