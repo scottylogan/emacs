@@ -195,6 +195,10 @@
 
 ;;; ----- PACKAGES
 
+(use-package vterm
+  :ensure t
+  :defer t)
+
 (use-package flycheck
   :ensure t
   :defer t
@@ -346,8 +350,6 @@
 (use-package memory-usage :ensure t)
 
 (use-package flymake-shellcheck :ensure t)
-
-(use-package vterm :ensure t)
 
 ;;; various tools
 ;;;(use-package makefile-executor :ensure t)
