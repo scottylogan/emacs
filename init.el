@@ -43,6 +43,14 @@
   ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
 
+;; catppuccin theme
+(use-package catppuccin-theme
+  :ensure t
+  :init
+  (load-theme 'catppuccin :noconfirm)
+  (setq catppuccin-flavor 'mocha)
+  (catppuccin-reload))
+
 ;; ----- GENERIC SETTINGS
 (setq default-directory "~/")
 (setq inhibit-splash-screen t)
@@ -114,43 +122,43 @@
 (global-set-key (kbd "C-M-s")   'isearch-forward)
 (global-set-key (kbd "C-M-r")   'isearch-backward)
 
-(when (window-system)
-  (load-theme 'tango-dark))
+;;(when (window-system)
+;;  (load-theme 'tango-dark))
 
 
 ;;; ----- FRAMES
 
-(add-to-list 'default-frame-alist '(height . 38))
-(add-to-list 'default-frame-alist '(width . 160))
+(add-to-list 'default-frame-alist '(height . 32))
+(add-to-list 'default-frame-alist '(width . 100))
 (setq frame-title-format "%f")
 
 (when (or (eq window-system 'ns) (eq window-system 'x))
-  (set-face-foreground 'mode-line "black")
-  (set-face-background 'mode-line "orange")
-  (set-face-foreground 'mode-line-inactive "gray")
-  (set-face-background 'mode-line-inactive "graphite")
+;;  (set-face-foreground 'mode-line "black")
+;;  (set-face-background 'mode-line "orange")
+;;  (set-face-foreground 'mode-line-inactive "gray")
+;;  (set-face-background 'mode-line-inactive "graphite")
 
   ;; default Latin font
   (set-face-attribute 'default nil
                       :family "Iosevka Slab"
                       :slant 'normal
-                      :height (cond ((< (display-pixel-height) 1080) 160)
+                      :height (cond ((< (display-pixel-height) 1550) 160)
                                     ((>= (display-pixel-height) 2160) 300)
                                     (t 220))))
 
 (defun scotty-frame-setup (&optional frame)
   "Configure new frames."
   (when (and (eq system-type 'darwin) (eq window-system 'ns))
-    (set-face-foreground 'mode-line "black")
-    (set-face-background 'mode-line "orange")
-    (set-face-foreground 'mode-line-inactive "gray")
-    (set-face-background 'mode-line-inactive "graphite")
+;;    (set-face-foreground 'mode-line "black")
+;;    (set-face-background 'mode-line "orange")
+;;    (set-face-foreground 'mode-line-inactive "gray")
+;;    (set-face-background 'mode-line-inactive "graphite")
 
     ;; default Latin font
     (set-face-attribute 'default frame
                         :family "Iosevka Slab"
                         :slant 'normal
-                        :height (cond ((< (display-pixel-height) 1080) 160)
+                        :height (cond ((< (display-pixel-height) 1550) 160)
                                       ((>= (display-pixel-height) 2160) 300)
                                       (t 220)))))
 
