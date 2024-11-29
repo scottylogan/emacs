@@ -339,7 +339,7 @@
 (use-package kubernetes :ensure t)
 
 (use-package slime :ensure t)
-(use-package slime-docker :ensure t)
+;;;(use-package slime-docker :ensure t)
 (use-package slime-repl-ansi-color :ensure t)
 
 (use-package emacsql :ensure t)
