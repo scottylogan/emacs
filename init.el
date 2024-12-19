@@ -43,6 +43,7 @@
   ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
 
+<<<<<<< Updated upstream
 ;; catppuccin theme
 (use-package catppuccin-theme
   :ensure t
@@ -180,11 +181,33 @@
     (display-buffer buffer '(display-buffer-pop-up-frame . nil))))
 
 
+;;; from https://www.emacswiki.org/emacs/NeoTree#h5o-11
+(defun scotty-neotree-project-dir ()
+  "Open NeoTree using the git root."
+  (interactive)
+  (let ((project-dir (projectile-project-root))
+        (file-name (buffer-file-name)))
+    (neotree-toggle)
+    (if project-dir
+        (if (neo-global--window-exists-p)
+            (progn
+              (neotree-dir project-dir)
+              (neotree-find file-name)))
+      (message "Could not find git project root."))))
+
 ;;; ----- PATH
 
+
 (setq-default exec-path
-              '(
-                "~/bin/"
+              (list
+               (substring
+                (concat "~/bin/"
+                        (symbol-name system-type)
+                        "_"
+                        (shell-command-to-string "uname -m"))
+                0 -1)
+                "~/bin"
+                "~/.nodenv/shims"
                 "/usr/local/bin"
                 "/opt/homebrew/bin"
                 "/opt/local/bin"
@@ -201,7 +224,14 @@
                 "/Applications/Emacs.app/Contents/MacOS/bin"
                 ))
 
+(setq shell-file-name (executable-find "bash"))
+
 ;;; ----- PACKAGES
+
+(use-package exec-path-from-shell
+  :ensure t
+  :init
+  (exec-path-from-shell-initialize))
 
 (use-package vterm
   :ensure t
@@ -210,7 +240,9 @@
 (use-package flycheck
   :ensure t
   :defer t
-  :init (global-flycheck-mode))
+  :init
+  (setq flycheck-disabled-checkers '(go-errcheck))
+  (global-flycheck-mode))
 
 (use-package company
   :ensure t
@@ -244,14 +276,22 @@
 (use-package go-autocomplete :ensure t)
 (use-package go-complete :ensure t)
 (use-package go-dlv :ensure t)
-(use-package go-eldoc :ensure t)
-(use-package go-errcheck :ensure t)
+(use-package go-eldoc
+  :ensure t
+  :init
+  (add-hook 'go-mode-hook 'go-eldoc-setup))
+(use-package go-errcheck
+  :ensure t
+  :init
+  (setq go-errcheck-ignorepkg '("fmt" "http.ResponseWriter")))
+
 (use-package go-expr-completion :ensure t)
 (use-package go-fill-struct :ensure t)
 (use-package go-gen-test :ensure t)
 (use-package go-guru :ensure t)
 (use-package go-imports :ensure t)
 (use-package go-playground :ensure t)
+
 
 (use-package arduino-cli-mode :ensure t)
 (use-package arduino-mode :ensure t)
@@ -263,12 +303,26 @@
 
 (use-package ansible :ensure t)
 (use-package ansible-doc :ensure t)
-(use-package flymake-ansible-lint :ensure t)
-
 
 (use-package forth-mode :ensure t)
 
-(use-package projectile :ensure t)
+(use-package projectile
+  :ensure t
+  :init
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+(use-package ivy
+  :ensure t
+  :init
+  (ivy-mode))
+(use-package counsel
+  :ensure t
+  :init
+  (counsel-mode))
+(use-package neotree
+  :ensure t
+  :init
+  (global-set-key [f8] 'scotty-neotree-project-dir))
 (use-package go-rename :ensure t)
 (use-package go-projectile :ensure t)
 
@@ -338,6 +392,7 @@
 (use-package kubedoc :ensure t)
 (use-package kubernetes :ensure t)
 
+(require 'tramp-container)
 (use-package slime :ensure t)
 ;;;(use-package slime-docker :ensure t)
 (use-package slime-repl-ansi-color :ensure t)
@@ -346,6 +401,10 @@
 (use-package emacsql-mysql :ensure t)
 (use-package emacsql-sqlite :ensure t)
 
+(use-package diminish
+  :ensure t
+  :init
+  (mapc 'diminish '(projectile counsel-mode ivy-mode company-mode auto-revert-mode)))
 
 ;;;(use-package package-build)
 ;;;(use-package lex)
@@ -357,12 +416,9 @@
 
 (use-package memory-usage :ensure t)
 
-(use-package flymake-shellcheck :ensure t)
-
 ;;; various tools
 ;;;(use-package makefile-executor :ensure t)
 (use-package puppet-mode :ensure t)
-(use-package flymake-puppet :ensure t)
 (use-package puppet-ts-mode :ensure t)
 
 (use-package systemd :ensure t)
