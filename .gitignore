@@ -1,0 +1,7 @@
+elpa/
+early-init.el
+init.el
+OLD/
+tramp
+projectile-bookmarks.eld
+places
