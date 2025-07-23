@@ -537,6 +537,7 @@ Some of the go packages require various go tools to be installed
   (use-package go-tag         :ensure t)
   ;; alternative
   ;;(use-package go-add-tags    :ensure t)
+  (use-package go-eldoc       :ensure t)
   (use-package go-fill-struct :ensure t)
   (use-package go-playground  :ensure t)
   (use-package golint         :ensure t)
