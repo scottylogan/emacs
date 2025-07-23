@@ -91,6 +91,7 @@ Re-enable =downcase-region=
 #+begin_src emacs-lisp
   (put 'downcase-region 'disabled nil)
 #+end_src
+
 * Custom Variables
 
 #+begin_src emacs-lisp
@@ -111,10 +112,10 @@ Re-enable =downcase-region=
             ".local")
     "Location of per-system customizations")
 
-  (defvar scotty/local-extras-init-file (expand-file-name "init" swl/local-dir)
+  (defvar scotty/local-extras-init-file (expand-file-name "init" scotty/local-extras-dir)
     "Per-system customization init file")
 
-  (defvar scotty/local-extras-early-init-file (expand-file-name "early-init" swl/local-dir)
+  (defvar scotty/local-extras-early-init-file (expand-file-name "early-init" scotty/local-extras-dir)
     "Per-system customization early init file, called after custom.el")
 
   (setq custom-file (locate-user-emacs-file "custom.el"))
