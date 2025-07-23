@@ -13,9 +13,9 @@
                  js2-mode json-mode launchctl lice lsp-ivy lsp-mode
                  lsp-treemacs lsp-ui markdown-mode markdown-toc
                  md-readme mermaid-docker-mode mocha nodejs-repl
-                 npm-mode org-superstar outline-toc rainbow-delimiters
-                 systemd terraform-doc terraform-mode typescript-mode
-                 vagrant vterm x509-mode yaml-mode))
+                 npm-mode org-superstar rainbow-delimiters systemd
+                 terraform-doc terraform-mode typescript-mode vagrant
+                 vterm x509-mode yaml-mode))
  '(safe-local-variable-values
    '((eval add-hook 'after-save-hook 'org-html-export-to-html)
      (eval add-hook 'after-save-hook 'org-md-export-to-markdown)
