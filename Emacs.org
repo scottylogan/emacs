@@ -49,6 +49,17 @@ This file is loaded before the package system, and before the GUI is intialized,
 (setq ring-bell-function 'ignore)
 #+end_src
 
+MacOS  ships with an old version of ~bash~ (3.x) in ~/bin~. My ~.profile~ detects things and execs the Homebrew version (if it is installed). When ==vterm== runs ~bash~  ~.profile~ is not read. So, before much gets started, set ==shell-file-name==
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  (defvar scotty/shell-file-name
+    (cond ((file-exists-p "/usr/local/bin/bash") "/usr/local/bin/bash")
+          ((file-exists-p "/opt/homebrew/bin/bash") "/opt/homebrew/bin/bash"))
+    "My preferred shell")
+
+  (when scotty/shell-file-name
+    (setq shell-file-name scotty/shell-file-name))
+#+end_src
 ----------
 * init.el
 
@@ -254,6 +265,7 @@ Aw, cute little catppuccin!
   ;; Disable line numbers for some modes
   (dolist (mode '(org-mode-hook
   		term-mode-hook
+      vterm-mode-hook
   		eshell-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
