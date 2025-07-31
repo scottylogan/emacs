@@ -11,7 +11,7 @@
                  go-gen-test go-lint go-mode go-playground
                  go-projectile go-tag golint htmlize ini-mode js-doc
                  js2-mode json-mode launchctl lice lsp-ivy lsp-mode
-                 lsp-treemacs lsp-ui markdown-mode markdown-toc
+                 lsp-treemacs lsp-ui magit markdown-mode markdown-toc
                  md-readme mermaid-docker-mode mocha nodejs-repl
                  npm-mode org-superstar rainbow-delimiters systemd
                  terraform-doc terraform-mode typescript-mode vagrant
