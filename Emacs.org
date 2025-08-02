@@ -30,6 +30,8 @@ This file is loaded before the package system, and before the GUI is intialized,
 <<warning>>
 ;;; early-init.el --- Early initialization -*- lexical-binding: t -*-
 
+  (setq package-enable-at-startup nil)
+
   ;; Disable GUI
   (tool-bar-mode -1)
   (tooltip-mode -1)
@@ -158,6 +160,21 @@ Re-enable =downcase-region=
 #+end_src
 
 * Package Management
+
+By default, emacs will install [[https://elpa.gnu.org/][Elpa]]  packages in the same location as =init.el=, in a subdirectory called =elpa=. I'd rather store them outside the version-controlled config, so those directories need to be configured (and created) before =package= / =use-package= are used.
+
+#+begin_src emacs-lisp
+  ;; keep packages outside the config repo
+  (setq package-gnupghome-dir
+        (expand-file-name "elpa/gnupg" scotty/local-state-dir))
+
+  (setq package-user-dir
+        (expand-file-name "elpa/" scotty/local-state-dir))
+
+  (make-directory package-gnupghome-dir t)
+#+end_src
+
+Let's auto-update the packages!
 
 #+begin_src emacs-lisp
   (require 'package)
@@ -355,6 +372,9 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
 
   (setq auto-save-file-name-transforms `((".*" ,scotty/autosave-dir t)))
 
+  (setq auto-save-list-file-prefix
+        (expand-file-name ".saves-" scotty/autosave-dir))
+
   (defvar scotty/backup-dir
     (expand-file-name "backup/" scotty/local-state-dir)
     "Location of backup files")
@@ -396,7 +416,7 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
         (expand-file-name "diary" scotty/local-state-dir))
 
   (setq nsm-settings-file
-         (expand-file-name "network-security.data" scotty/local-state-dir))
+        (expand-file-name "network-security.data" scotty/local-state-dir))
   (setq org-id-locations-file
         (expand-file-name ".org-id-locations" scotty/local-state-dir))
   (setq project-list-file
@@ -406,14 +426,6 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
 
   (setq server-auth-dir
         (expand-file-name "server/" scotty/local-state-dir))
-
-  (setq package-gnupghome-dir
-        (expand-file-name "elpa/gnupg" scotty/local-state-dir))
-
-  (setq package-user-dir
-        (expand-file-name "elpa/" scotty/local-state-dir))
-
-  (make-directory package-gnupghome-dir t)
 
 #+end_src
 
