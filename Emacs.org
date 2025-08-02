@@ -1,3 +1,4 @@
+
 #+title: Scotty's Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 #+OPTIONS: toc:2
@@ -29,24 +30,24 @@ This file is loaded before the package system, and before the GUI is intialized,
 <<warning>>
 ;;; early-init.el --- Early initialization -*- lexical-binding: t -*-
 
-;; Disable GUI
-(tool-bar-mode -1)
-(tooltip-mode -1)
-(scroll-bar-mode -1)
-(setq use-dialog-box nil)
-(setq use-file-dialog nil)
-(setq-default frame-title-format '("%b  -  GNU Emacs"))
+  ;; Disable GUI
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (scroll-bar-mode -1)
+  (setq use-dialog-box nil)
+  (setq use-file-dialog nil)
+  (setq-default frame-title-format '("%b  -  GNU Emacs"))
 
-;; Hide the startup screen
-(setq inhibit-startup-screen t)
+  ;; Hide the startup screen
+  (setq inhibit-startup-screen t)
 
-;; disable menu bar when running in a terminal, or X
-;; but leave on for MacOS GUI Emacs
-(when (or (not window-system) (eq window-system 'x))
-  (menu-bar-mode -1))
+  ;; disable menu bar when running in a terminal, or X
+  ;; but leave on for MacOS GUI Emacs
+  (when (or (not window-system) (eq window-system 'x))
+    (menu-bar-mode -1))
 
-;; Disable bell sound.
-(setq ring-bell-function 'ignore)
+  ;; Disable bell sound.
+  (setq ring-bell-function 'ignore)
 #+end_src
 
 MacOS  ships with an old version of ~bash~ (3.x) in ~/bin~. My ~.profile~ detects things and execs the Homebrew version (if it is installed). When ==vterm== runs ~bash~  ~.profile~ is not read. So, before much gets started, set ==shell-file-name==
@@ -60,6 +61,14 @@ MacOS  ships with an old version of ~bash~ (3.x) in ~/bin~. My ~.profile~ detect
   (when scotty/shell-file-name
     (setq shell-file-name scotty/shell-file-name))
 #+end_src
+
+Emacs uses ==server== as the default name for the Emacs server; this can cause problems if you run Emacs as two users (at least it did on my Mac when I used fast user switching between a work and personal account). Setting the server name to the name of the user solves this issue.
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  (setq server-name user-login-name)
+#+end_src
+
+
 ----------
 * init.el
 
@@ -118,15 +127,22 @@ Re-enable =downcase-region=
 
   (make-directory scotty/local-state-dir t)
 
+  (defvar scotty/hostname
+    (car (split-string system-name "\\."))
+    "Short hostname")
+
   (defvar scotty/local-extras-dir
-    (concat (directory-file-name (file-name-parent-directory user-init-file))
+    (concat (directory-file-name
+             (file-name-parent-directory user-init-file))
             ".local")
     "Location of per-system customizations")
 
-  (defvar scotty/local-extras-init-file (expand-file-name "init" scotty/local-extras-dir)
+  (defvar scotty/local-extras-init-file
+    (expand-file-name "init" scotty/local-extras-dir)
     "Per-system customization init file")
 
-  (defvar scotty/local-extras-early-init-file (expand-file-name "early-init" scotty/local-extras-dir)
+  (defvar scotty/local-extras-early-init-file
+    (expand-file-name "early-init" scotty/local-extras-dir)
     "Per-system customization early init file, called after custom.el")
 
   (setq custom-file (locate-user-emacs-file "custom.el"))
@@ -181,6 +197,26 @@ On MacOS Emacs.app is usually started from outside the shell, so PATH is probabl
     :init
     (scotty/exec-path-from-shell-setup)
     (exec-path-from-shell-initialize))
+#+end_src
+
+* MacOS
+
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    (setq ns-alternate-modifier 'meta
+      ns-command-modifier 'super
+      ns-control-modifier 'control
+      ns-fn-modifier 'alt
+      ns-option-modifier 'meta
+      ns-right-alternate-modifier 'left
+      ns-right-command-modifier 'left
+      ns-right-control-modifier 'left
+      ns-right-option-modifier 'left)
+    (when (eq window-system 'ns)
+      (setq ns-antialias-text t
+            ns-auto-hide-menu-bar nil
+            ns-confirm-quit nil
+            ns-use-srgb-colorspace t)))
 #+end_src
 
 * Look and Feel
@@ -264,9 +300,9 @@ Aw, cute little catppuccin!
 
   ;; Disable line numbers for some modes
   (dolist (mode '(org-mode-hook
-  		term-mode-hook
-      vterm-mode-hook
-  		eshell-mode-hook))
+  		            term-mode-hook
+                  vterm-mode-hook
+  		            eshell-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
 
@@ -325,13 +361,60 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
 
   (make-directory scotty/backup-dir t)
 
-  ;;;  (setq backup-directory-alist (list (cons "." scotty/backup-dir)))
+  ;; (setq backup-directory-alist (list (cons "." scotty/backup-dir)))
   (setq backup-directory-alist `(("." . ,scotty/backup-dir)))
   (setq backup-by-copying t               ; don't clobber symlinks
         version-control t                 ; use versioned backups
         delete-old-versions t
         kept-new-versions 6
         kept-old-versions 2)
+
+  (defvar scotty/transient-dir
+    (expand-file-name "transient/" scotty/local-state-dir)
+    "Location of autosave files")
+
+  (make-directory scotty/transient-dir t)
+
+  (setq transient-history-file
+        (expand-file-name "history.el" scotty/transient-dir))
+
+  (setq transient-levels-file
+        (expand-file-name "levels.el" scotty/transient-dir))
+
+  (setq transient-values-file
+        (expand-file-name "values.el" scotty/transient-dir))
+
+  (setq tramp-persistency-file-name
+        (expand-file-name "tramp" scotty/local-state-dir))
+
+  (setq bookmark-default-file
+        (expand-file-name "bookmarks" scotty/local-state-dir))
+  (setq bookmark-file bookmark-default-file)
+  (setq bookmark-old-default-file bookmark-default-file)
+
+  (setq diary-file
+        (expand-file-name "diary" scotty/local-state-dir))
+
+  (setq nsm-settings-file
+         (expand-file-name "network-security.data" scotty/local-state-dir))
+  (setq org-id-locations-file
+        (expand-file-name ".org-id-locations" scotty/local-state-dir))
+  (setq project-list-file
+        (expand-file-name "projects" scotty/local-state-dir))
+  (setq projectile-known-projects-file
+        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
+
+  (setq server-auth-dir
+        (expand-file-name "server/" scotty/local-state-dir))
+
+  (setq package-gnupghome-dir
+        (expand-file-name "elpa/gnupg" scotty/local-state-dir))
+
+  (setq package-user-dir
+        (expand-file-name "elpa/" scotty/local-state-dir))
+
+  (make-directory package-gnupghome-dir t)
+
 #+end_src
 
 * Places and Minibuffer History
@@ -372,23 +455,24 @@ Emacs normally won't automatically revert buffers when the underlying file has b
 
 * Font Configuration
 
-I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] and [[https://fonts.google.com/specimen/Cantarell][Cantarell]] fonts for this configuration which will more than likely need to be installed on your machine.  Both can usually be found in the various Linux distro package managers or downloaded from the links above.
+I am using the =JetBrainsMono Nerd Font Mono= and =Museo Slab= fonts for this configuration which will more than likely need to be installed on your machine.  Both can usually be found in the various Linux distro package managers or downloaded from the links above.
 
 #+begin_src emacs-lisp
 
   (set-face-attribute 'default nil
-  		    :font "Fira Code Retina"
-  		    :height scotty/default-font-size)
+                      :font "SF Mono"
+                      :height scotty/default-font-size)
 
   ;; Set the fixed pitch face
   (set-face-attribute 'fixed-pitch nil
-  		     :font "Fira Code Retina"
-  		     :height scotty/default-font-size)
+                      :font "SF Mono"
+                      :height scotty/default-font-size)
 
   ;; Set the variable pitch face
   (set-face-attribute 'variable-pitch nil
-  		     :font "Cantarell"
-  		     :height scotty/default-font-size :weight 'regular)
+                      :font "Museo Slab"
+                      :height scotty/default-font-size
+                      :slant 'normal)
 
 #+end_src
 
@@ -419,11 +503,9 @@ The =scotty/org-font-setup= function configures various text faces to tweak the 
   		  (org-level-7 . 1.1)
   		  (org-level-8 . 1.1)))
       (set-face-attribute (car face) nil
-  			 :font "Cantarell" :weight 'regular
-  			 :height (cdr face)))
+                          :font "Museo Slab" :weight 'bold
+  			                  :height (cdr face)))
 
-    ;; Ensure that anything that should be fixed-pitch in Org files
-    ;; appears that way
     (set-face-attribute 'org-block nil
   		       :foreground nil
   		       :inherit 'fixed-pitch)
