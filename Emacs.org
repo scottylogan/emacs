@@ -157,6 +157,8 @@ Re-enable =downcase-region=
   ;; try to load early per-system customization
   (when (file-exists-p scotty/local-extras-early-init-file)
     (load scotty/local-extras-early-init-file))
+
+   
 #+end_src
 
 * Package Management
@@ -172,6 +174,15 @@ By default, emacs will install [[https://elpa.gnu.org/][Elpa]]  packages in the 
         (expand-file-name "elpa/" scotty/local-state-dir))
 
   (make-directory package-gnupghome-dir t)
+
+  (setq scotty/eln-cache
+    (expand-file-name "eln-cache" scotty/local-state-dir))
+
+  (make-directory scotty/eln-cache t)
+
+  (startup-redirect-eln-cache scotty/eln-cache)
+
+
 #+end_src
 
 Let's auto-update the packages!
