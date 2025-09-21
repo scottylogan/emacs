@@ -1,58 +1,81 @@
-
 #+title: Scotty's Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 #+OPTIONS: toc:2
 
-There are two files in this base configuration, =early-init.el= and =init.el=
+There are two files in this base configuration, ~early-init.el~ and ~init.el~.
 
-* Warning
+* Tangle Configuration Files
 
-Start both files with a warning that they are now tangled from =Emacs.org=. This code block will be tangled into =./init.el=, but because itt is named, it can be reused in =early-init.el=.
+This file can be converted to ~early-init.el~ and ~init.el~ by running ~org-babel-tangle~, or just answer /y/ to the /Tangle?/ question when saving.
+
+----------
+
+* Early Configuration - early-init.el
+
+This file is loaded before the package system, and before the GUI is intialized, so we can use it to configure the package system and the GUI.
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  ;;; early-init.el --- Early initialization -*- lexical-binding: t -*-
+#+end_src
+
+** Warning
+
+Add a warning at the top of this file, so that I don't accidentally edit ~early-init.el~ directly. The code block has a name so it can be reused in ~init.el~.
 
 #+name: warning
-#+begin_src emacs-lisp :eval never
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
 
   ;; NOTE: this file is now generated from Emacs.org.  Please edit that file
   ;;       in Emacs and this file will be generated automatically!
 
 #+end_src
 
-* Tangle Configuration Files
+** Delay Package Setup
 
-This file can be converted to ~init.el~ by running ~org-babel-tangle~, or just answer /y/ to the /Tangle?/ question when saving.
-
-----------
-* early-init.el
-
-This file is loaded before the package system, and before the GUI is intialized, so we can use it to configure the package system and the GUI. I configure emacs with no toolbars, no tooltips, no scroll bars, no dialog boxes, and no startup screen. If  it's on a Mac I leave the nenu bar enabled. 
+Normally Emacs will make installed packages available after ~early-init.el~ but before ~init.el~; disabling this behavior allows some package config first.
 
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
-<<warning>>
-;;; early-init.el --- Early initialization -*- lexical-binding: t -*-
-
   (setq package-enable-at-startup nil)
+#+end_src
 
+** Minimal GUI
+
+I like to minimize the GUI bits. I configure emacs with no toolbars, no tooltips, no scroll bars, no dialog boxes, and no startup screen.
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   ;; Disable GUI
   (tool-bar-mode -1)
   (tooltip-mode -1)
   (scroll-bar-mode -1)
   (setq use-dialog-box nil)
   (setq use-file-dialog nil)
-  (setq-default frame-title-format '("%b  -  GNU Emacs"))
 
   ;; Hide the startup screen
   (setq inhibit-startup-screen t)
+#+end_src
 
-  ;; disable menu bar when running in a terminal, or X
-  ;; but leave on for MacOS GUI Emacs
+Disable menu bar when running in a terminal, or X, but leave on for MacOS GUI Emacs, otherwise it looks weird.
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   (when (or (not window-system) (eq window-system 'x))
     (menu-bar-mode -1))
+#+end_src
 
-  ;; Disable bell sound.
+Beeps are annoying, so disable the bell sound.
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   (setq ring-bell-function 'ignore)
 #+end_src
 
-MacOS  ships with an old version of ~bash~ (3.x) in ~/bin~. My ~.profile~ detects things and execs the Homebrew version (if it is installed). When ==vterm== runs ~bash~  ~.profile~ is not read. So, before much gets started, set ==shell-file-name==
+Set the default window title format
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  (setq-default frame-title-format '("%b %f"))
+#+end_src
+
+** Shell support - MacOS, Homebrew, and Bash
+
+MacOS ships with an old version of ~bash~ (3.x) in ~/bin~. [[https://brew.sh][Homebrew]] provides a modern bash, but it's installed in different paths on Intel vs Apple Silicon. This sets ~scotty/shell-file-name~ appropriately.
 
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   (defvar scotty/shell-file-name
@@ -64,21 +87,57 @@ MacOS  ships with an old version of ~bash~ (3.x) in ~/bin~. My ~.profile~ detect
     (setq shell-file-name scotty/shell-file-name))
 #+end_src
 
-Emacs uses ==server== as the default name for the Emacs server; this can cause problems if you run Emacs as two users (at least it did on my Mac when I used fast user switching between a work and personal account). Setting the server name to the name of the user solves this issue.
+** Server Configuration
+
+Emacs uses ~server~ as the default name for the Emacs server; this can cause problems if you run Emacs as two users (at least it did on my Mac when I used fast user switching between a work and personal account). Setting the server name to the name of the user solves this issue.
 
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   (setq server-name user-login-name)
 #+end_src
 
+** Local State
+
+By default Emacs keeps lots of state files in ~user-emacs-directory~ (~\~/.emacs.d~ or ~\~/.config/emacs~). Since those files are unique to each system, rather than having to exclude all those files from git, I try to keep them somewhere else.
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  ;; keep state out of the config directory
+  (defvar scotty/local-state-dir "~/.emacs-local"
+    "Location of system-specific state files")
+
+  (make-directory scotty/local-state-dir t)
+#+end_src
+
+*** Native Compilation Cache
+
+#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  (defvar scotty/eln-cache-dir
+          (expand-file-name "eln-cache" scotty/local-state-dir)
+  	"Location of native compilation cache")
+
+  (make-directory scotty/eln-cache-dir t)
+
+  (when (and (fboundp 'startup-redirect-eln-cache)
+    	   (fboundp 'native-comp-available-p)
+    	   (native-comp-available-p))
+    (startup-redirect-eln-cache scotty/eln-cache-dir))
+#+end_src
 
 ----------
-* init.el
 
-* Generic bits
+* Main Configuration - init.el
+
+Include the warning
+
+#+begin_src emacs-lisp :tangle ./init.el :noweb yes
+  ;;; init.el --- Initialization -*- lexical-binding: t -*-
+  <<warning>>
+#+end_src
+
+** Generic bits
 
 Set the default directory.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle ./init.el :noweb yes
   (setq default-directory "~/")
 #+end_src
 
@@ -95,7 +154,13 @@ Disable double spaces at sentence ends
   (setq sentence-end-double-space nil)
 #+end_src
 
-* Global Key Bindings
+Re-enable ~downcase-region~.
+
+#+begin_src emacs-lisp
+  (put 'downcase-region 'disabled nil)
+#+end_src
+
+** Global Key Bindings
 
 #+begin_src emacs-lisp
   (global-set-key (kbd "s-r")     #'replace-string)
@@ -108,80 +173,72 @@ Disable double spaces at sentence ends
   (global-set-key (kbd "C-M-r")   'isearch-backward)
 #+end_src
 
-Re-enable =downcase-region=
+** Custom Variables
 
 #+begin_src emacs-lisp
-  (put 'downcase-region 'disabled nil)
-#+end_src
-
-* Custom Variables
-
-#+begin_src emacs-lisp
-
-  (defvar scotty/default-font-size 180
-    "default font size")
-  (defvar scotty/default-variable-font-size 180
-    "default variable (proportional) font size")
-
-  ;; keep autosaves, backups, etc. out of the config directory
-  (defvar scotty/local-state-dir "~/.emacs-local"
-    "Location of system-specific state files")
-
-  (make-directory scotty/local-state-dir t)
-
   (defvar scotty/hostname
     (car (split-string system-name "\\."))
     "Short hostname")
-
-  (defvar scotty/local-extras-dir
-    (concat (directory-file-name
-             (file-name-parent-directory user-init-file))
-            ".local")
-    "Location of per-system customizations")
-
-  (defvar scotty/local-extras-init-file
-    (expand-file-name "init" scotty/local-extras-dir)
-    "Per-system customization init file")
-
-  (defvar scotty/local-extras-early-init-file
-    (expand-file-name "early-init" scotty/local-extras-dir)
-    "Per-system customization early init file, called after custom.el")
-
-  (setq custom-file (locate-user-emacs-file "custom.el"))
-
-  ;; Variables configured via the interactive 'customize' interface
-  ;; load this before the packages
-  (when (file-exists-p custom-file)
-    (load custom-file))
-
-  ;; try to load early per-system customization
-  (when (file-exists-p scotty/local-extras-early-init-file)
-    (load scotty/local-extras-early-init-file))
-
-   
 #+end_src
 
-* Package Management
+*** Custom
 
-By default, emacs will install [[https://elpa.gnu.org/][Elpa]]  packages in the same location as =init.el=, in a subdirectory called =elpa=. I'd rather store them outside the version-controlled config, so those directories need to be configured (and created) before =package= / =use-package= are used.
+Anything customized with ~customize~, plus some other things, like list of packages, are saved into ~custom.el~, so try to load that. Keep ~custom.el~ local to each machine.
 
 #+begin_src emacs-lisp
-  ;; keep packages outside the config repo
-  (setq package-gnupghome-dir
-        (expand-file-name "elpa/gnupg" scotty/local-state-dir))
+  (setq custom-file
+        (expand-file-name "custom.el" scotty/local-state-dir))
 
-  (setq package-user-dir
-        (expand-file-name "elpa/" scotty/local-state-dir))
+  ;; Variables configured via the interactive 'customize' interface load this before the packages
+  (when (file-exists-p custom-file)
+    (load custom-file))
+#+end_src
 
-  (make-directory package-gnupghome-dir t)
+*** Local Customizations
 
-  (setq scotty/eln-cache
-    (expand-file-name "eln-cache" scotty/local-state-dir))
+I reuse this configuration across a bunch of systems, and sometimes I need system-specific tweaks. I start with a directory at the same level as the one containing ~early-init.el~ and ~init.el~, but with a ~.local~ suffix
 
-  (make-directory scotty/eln-cache t)
+#+begin_src emacs-lisp
+    (defvar scotty/local-extras-dir
+      (concat (directory-file-name
+               (file-name-parent-directory user-init-file))
+              ".local")
+      "Location of per-system customizations")
+#+end_src
 
-  (startup-redirect-eln-cache scotty/eln-cache)
+Next, I create paths to ~early-init~ and ~init~ files in that directory
 
+#+begin_src emacs-lisp
+
+    (defvar scotty/local-extras-early-init-file
+      (expand-file-name "early-init" scotty/local-extras-dir)
+      "Per-system early init file")
+
+    (defvar scotty/local-extras-init-file
+      (expand-file-name "init" scotty/local-extras-dir)
+      "Per-system init file")
+#+end_src
+
+After the default ~early-init.el~ and ~custom.el~ are loaded, try to load the local ~early-init.el~
+
+#+begin_src emacs-lisp
+    (when (file-exists-p scotty/local-extras-early-init-file)
+      (load scotty/local-extras-early-init-file))
+#+end_src
+
+** Package Management
+
+By default, emacs will install [[https://elpa.gnu.org/][Elpa]]  packages in the same location as ~init.el~, in a subdirectory called ~elpa~. I'd rather store them outside the version-controlled config, so those directories need to be configured (and created) before ~package~ / ~use-package~ are used.
+
+#+begin_src emacs-lisp
+    ;; keep packages outside the config repo
+    (setq package-gnupghome-dir
+          (expand-file-name "elpa/gnupg" scotty/local-state-dir))
+
+    (setq package-user-dir
+          (expand-file-name "elpa/" scotty/local-state-dir))
+
+    (make-directory package-gnupghome-dir t)
 
 #+end_src
 
@@ -205,21 +262,15 @@ Let's auto-update the packages!
     (auto-package-update-maybe))
 #+end_src
 
-* Shell Environment
-On MacOS Emacs.app is usually started from outside the shell, so PATH is probably not set up properly. While /bin/bash on Linux is usually up-to-date, it's out of date on MacOS. [[https://brew.sh][Homebrew]] provides a modern bash, but it's installed in different paths on Intel vs Apple Silicon. =scotty/exec-path-from-shell-setup= sets =exec-path-from-shell-shell-name= and =exec-path-from-shell-arguments= appropriately.
+** Shell Environment
+
+On MacOS Emacs.app is usually started from outside the shell, so PATH is probably not set up properly. ~early-init.el~ sets ~scotty/shell-file-name~ to the correct path, and sets ~shell-file-name~ too. However, When ~vterm~ runs ~bash~, ~.profile~ is not read, so if we're using the non-system ~bash~, invoke it as a login shell (add the ~-l~ argument).
 
 #+begin_src emacs-lisp
-
   (defun scotty/exec-path-from-shell-setup ()
-    ;; deal with homebrew bash
-    (setq exec-path-from-shell-shell-name
-  	(cond ((file-exists-p "/usr/local/bin/bash") "/usr/local/bin/bash")
-                ((file-exists-p "/opt/homebrew/bin/bash") "/opt/homebrew/bin/bash")
-  	      (t "/bin/bash")))
     (setq exec-path-from-shell-arguments
-  	(cond ((string-equal exec-path-from-shell-shell-name "/bin/bash") (list "-i"))
-        	 (t (list "-i" "-l")))))
-
+  	      (cond (scotty/shell-file-name '("-i" "-l"))
+        	      (t '("-i")))))
   (use-package exec-path-from-shell
     :ensure t
     :init
@@ -227,7 +278,9 @@ On MacOS Emacs.app is usually started from outside the shell, so PATH is probabl
     (exec-path-from-shell-initialize))
 #+end_src
 
-* MacOS
+** MacOS
+
+Set up the key mappings for the Apple / Command key (⌘), Option (⌥), and Control.
 
 #+begin_src emacs-lisp
   (when (eq system-type 'darwin)
@@ -239,40 +292,80 @@ On MacOS Emacs.app is usually started from outside the shell, so PATH is probabl
       ns-right-alternate-modifier 'left
       ns-right-command-modifier 'left
       ns-right-control-modifier 'left
-      ns-right-option-modifier 'left)
-    (when (eq window-system 'ns)
-      (setq ns-antialias-text t
-            ns-auto-hide-menu-bar nil
-            ns-confirm-quit nil
-            ns-use-srgb-colorspace t)))
+      ns-right-option-modifier 'left))
 #+end_src
 
-* Look and Feel
-
-Turn off the initial splash screen
+Enabling anti-aliased text, and other Mac tweaks.
 
 #+begin_src emacs-lisp
-(setq inhibit-splash-screen t)
+  (when (eq window-system 'ns)
+    (setq ns-antialias-text t
+          ns-auto-hide-menu-bar nil
+          ns-confirm-quit nil
+          ns-use-srgb-colorspace t))
 #+end_src
 
-** Frames
+** Look and Feel
+*** Fonts
 
-Customize frames (windows) when running in a GUI
+Setup monospaced and proportional fonts.
 
 #+begin_src emacs-lisp
-  (defun scotty/frame-setup (&optional frame)
-    "Configure new frames."
-    ;; default Latin font
-    (set-face-attribute 'default frame
-                        :family "Iosevka Slab"
+  (defvar scotty/monospaced-font "SF Mono"
+    "My preferred monospace font")
+
+  (defvar scotty/proportional-font "Museo Slab"
+    "My preferred proportional font")
+#+end_src
+
+Set the font size (height) based on the display size.
+
+#+begin_src emacs-lisp
+  (defvar scotty/monospaced-font-size
+    (cond ((< (display-pixel-height) 1550) 160)  ; small screen
+          ((>= (display-pixel-height) 2160) 300) ; 4K display
+          (t 220))                               ; regular screen
+    "My preferred font size")
+
+  (defvar scotty/proportional-font-size scotty/monospaced-font-size
+    "My preferred proportional font size")
+#+end_src
+
+Now set up the default, monospaced and proportional fonts.
+
+#+begin_src emacs-lisp
+  (set-face-attribute 'default nil
+                      :font scotty/monospaced-font
+                      :height scotty/monospaced-font-size)
+
+  ;; Set the fixed pitch face
+  (set-face-attribute 'fixed-pitch nil
+                      :font scotty/monospaced-font
+                      :height scotty/monospaced-font-size)
+
+  ;; Set the variable pitch face
+  (set-face-attribute 'variable-pitch nil
+                      :font scotty/proportional-font
+                      :height scotty/proportional-font-size
+                      :slant 'normal)
+#+end_src
+
+*** Windows (Frames)
+
+Emacs calls GUI windows frames. When running in a GUI, set the default frame size ( 32 rows x 100 columns) and font.
+
+#+begin_src emacs-lisp
+  (when window-system
+    (add-to-list 'default-frame-alist '(height . 32))
+    (add-to-list 'default-frame-alist '(width . 100))
+
+    (set-face-attribute 'default nil
+                        :family scotty/monospaced-font
                         :slant 'normal
-                        :height (cond ((< (display-pixel-height) 1550) 160)
-                                      ((>= (display-pixel-height) 2160) 300)
-                                      (t 220))))
-
+                        :height scotty/monospaced-font-size))
 #+end_src
 
-Function to open a new frame with a new, empty buffer, based on a [[https://stackoverflow.com/questions/25791605/emacs-how-do-i-create-a-new-empty-buffer-whenever-creating-a-new-frame][post]] on Stack Overflow
+Function to open a new frame with a new, empty buffer, based on a [[https://stackoverflow.com/questions/25791605/emacs-how-do-i-create-a-new-empty-buffer-whenever-creating-a-new-frame][post]] on Stack Overflow. Bind ~scotty/new-empty-frame~ to a global key (⌘N on MacOS)
 
 #+begin_src emacs-lisp
   (defun scotty/new-empty-frame ()
@@ -282,27 +375,10 @@ Function to open a new frame with a new, empty buffer, based on a [[https://stac
       (set-buffer-major-mode buffer)
       (display-buffer buffer '(display-buffer-pop-up-frame . nil))))
 
-
-#+end_src
-
-When running in a GUI, set the default  frame size ( 32 rows x 100 columns), set the title to the filename, and set the default font; the size is set according to screen resolution. Finally, bind =scotty/new-empty-frame= to a global key (⌘N on MacOS)
-
-#+begin_src emacs-lisp
-  (when (or (eq window-system 'ns) (eq window-system 'x))
-    (add-to-list 'default-frame-alist '(height . 32))
-    (add-to-list 'default-frame-alist '(width . 100))
-    (setq frame-title-format "%f")
-
-    (set-face-attribute 'default nil
-                        :family "Iosevka Slab"
-                        :slant 'normal
-                        :height (cond ((< (display-pixel-height) 1550) 160)
-                                      ((>= (display-pixel-height) 2160) 300)
-                                      (t 220))))
   (global-set-key (kbd "s-n") #'scotty/new-empty-frame)
 #+end_src
 
-* Theme
+** Theme
 
 Aw, cute little catppuccin!
 
@@ -317,8 +393,9 @@ Aw, cute little catppuccin!
 
 ** Column and Line Numbers
 
-#+begin_src emacs-lisp
+Show the column number in the mode line. Enable line numbers on wide frames, but disable them in terminal-like modes.
 
+#+begin_src emacs-lisp
   ;; show colum number in mode line
   (column-number-mode)
 
@@ -336,6 +413,8 @@ Aw, cute little catppuccin!
 
 ** Mode Line
 
+The ~diminish~ package hides some minor modes from the modeline, making it a little cleaner.
+
 #+begin_src emacs-lisp
   (use-package diminish
     :ensure t
@@ -350,29 +429,58 @@ Aw, cute little catppuccin!
                       eldoc-mode)))
 #+end_src
 
-* Indentation
+Use the doom modeline, and "nerd" icons.
+
 #+begin_src emacs-lisp
-  ;;; ----- INDENTATION and PROGRAMMING
+  (use-package nerd-icons)
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1))
+  (setq doom-modeline-hud nil)
+
+  (setq doom-modeline-vcs-state-faces-alist
+      '((needs-update . (doom-modeline-warning bold))
+        (removed . (doom-modeline-urgent bold))
+        (conflict . (doom-modeline-urgent bold))
+        (unregistered . (doom-modeline-urgent bold))))
+#+end_src
+
+** Indentation
+
+Set code indentation to 2.
+
+#+begin_src emacs-lisp
+  (defvar scotty/code-indentation 2
+    "My preferred code indentation")
 
   (setq-default indent-tabs-mode nil)
   (setq-default size-indication-mode t)
 
-  (setq-default tab-width 2)
-
+  (setq-default tab-width scotty/code-indentation)
+  (setq-default standard-indent scotty/code-indentation)
   (setq-default apache-indent-level tab-width)
   (setq-default c-basic-indent tab-width)
   (setq-default c-basic-offset tab-width)
+  (setq-default css-indent-offset tab-width)
+  (setq-default dockerfile-indent-offset tab-width)
   (setq-default freeradius-indent-offset tab-width)
+  (setq-default hcl-indent-level tab-width)
   (setq-default js-indent-level tab-width)
+  (setq-default lisp-body-indent tab-width)
+  (setq-default sgml-basic-offset tab-width)
   (setq-default sh-basic-offset tab-width)
   (setq-default sh-indentation tab-width)
+  (setq-default standard-indent tab-width)
+  (setq-default terraform-indent-level tab-width)
+  (setq-default typescript-indent-level tab-width)
   (setq-default web-mode-code-indent-offset tab-width)
+  (setq-default yaml-indent-offset tab-width)
 
 #+end_src
 
-* Autosaving and Backups
+** Autosaving and Backups
 
-By default Emacs will autosave files in the current directory as =#filename#=; when a file is saved it will also create a backup of the original file as =filename~=. Rather than have these scattered all over the filesystem, keep them all in one place.
+By default Emacs will autosave files in the current directory as ~#filename#~; when a file is saved it will also create a backup of the original file as ~filename\~~. Rather than have these scattered all over the filesystem, keep them all in one place.
 
 #+begin_src emacs-lisp
   (defvar scotty/autosave-dir
@@ -440,9 +548,9 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
 
 #+end_src
 
-* Places and Minibuffer History
+** Places and Minibuffer History
 
-By default, Emacs will store the =places= file, tracking the current position in each file, and the history file, storing the history of minibuffer commands, in the =user-emacs-directory= (usually =~/.emacs.d= or =~/.config/emacs=). Rather than excluding these with a =.gitignore= file, just keep them local to each system.
+By default, Emacs will store the ~places~ file, tracking the current position in each file, and the history file, storing the history of minibuffer commands, in the ~user-emacs-directory~. Rather than excluding these with a ~.gitignore~ file, just keep them local to each system, using ~scotty/local-state-dir~.
 
 #+begin_src emacs-lisp
   (defvar scotty/history-file
@@ -463,48 +571,21 @@ By default, Emacs will store the =places= file, tracking the current position in
   (setq save-place-forget-unreadable-files nil)
 #+end_src
 
-* Handle Externally Modified Files
+** Handle Externally Modified Files
 
 Emacs normally won't automatically revert buffers when the underlying file has been modified, which can be annoying.
 
 #+begin_src emacs-lisp
-  ;; Revert buffers when the underlying file has changed
   (global-auto-revert-mode 1)
-
-  ;; Revert Dired and other buffers
   (setq global-auto-revert-non-file-buffers t)
 #+end_src
 
 
-* Font Configuration
+** Org-Mode
 
-I am using the =JetBrainsMono Nerd Font Mono= and =Museo Slab= fonts for this configuration which will more than likely need to be installed on your machine.  Both can usually be found in the various Linux distro package managers or downloaded from the links above.
+*** Better Font Faces
 
-#+begin_src emacs-lisp
-
-  (set-face-attribute 'default nil
-                      :font "SF Mono"
-                      :height scotty/default-font-size)
-
-  ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil
-                      :font "SF Mono"
-                      :height scotty/default-font-size)
-
-  ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil
-                      :font "Museo Slab"
-                      :height scotty/default-font-size
-                      :slant 'normal)
-
-#+end_src
-
-
-* Org-Mode
-
-** Better Font Faces
-
-The =scotty/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
+The ~scotty/org-font-setup~ function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in ~org-mode~.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
 
 #+begin_src emacs-lisp
 
@@ -526,7 +607,8 @@ The =scotty/org-font-setup= function configures various text faces to tweak the 
   		  (org-level-7 . 1.1)
   		  (org-level-8 . 1.1)))
       (set-face-attribute (car face) nil
-                          :font "Museo Slab" :weight 'bold
+                          :font scotty/proportional-font
+                          :weight 'bold
   			                  :height (cdr face)))
 
     (set-face-attribute 'org-block nil
@@ -559,15 +641,15 @@ The =scotty/org-font-setup= function configures various text faces to tweak the 
 
 #+end_src
 
-** Disable Header Numbering for HTML Export
+*** Disable Header Numbering for HTML Export
 
 #+begin_src emacs-lisp
 (setq org-export-with-section-numbers nil)
 #+end_src
 
-** Nicer Heading Bullets
+*** Nicer Heading Bullets
 
-[[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] replaces the heading stars in =org-mode= buffers with nicer looking ones.
+[[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] replaces the heading stars in ~org-mode~ buffers with nicer looking ones.
 
 #+begin_src emacs-lisp
 
@@ -578,8 +660,8 @@ The =scotty/org-font-setup= function configures various text faces to tweak the 
 
 #+end_src
 
-* Documentation
-** Markdown
+** Documentation
+*** Markdown
 
 #+begin_src emacs-lisp
   (use-package markdown-mode :ensure t)
@@ -596,7 +678,7 @@ The =scotty/org-font-setup= function configures various text faces to tweak the 
   (global-set-key "\C-cm" 'scotty/markdown-preview-file)
 #+end_src
 
-** Licenses
+*** Licenses
 
 Default to [[https://opensource.org/license/mit][MIT]] license
 
@@ -608,17 +690,23 @@ Default to [[https://opensource.org/license/mit][MIT]] license
     (setq lice:default-license "mit"))
 #+end_src
 
-** Mermaid Diagrams
+*** Mermaid Diagrams
 
 #+begin_src emacs-lisp
   (use-package mermaid-mode :ensure t)
   (use-package mermaid-docker-mode :ensure t)
 #+end_src
 
+** dotenv Files
+There's a handy ~dotenv-mode~ for editing ~.env~ files
 
-* Javascript / Node.js
+#+begin_src emacs-lisp
+  (use-package dotenv-mode :ensure t)
+#+end_src
 
-I use [[https://github.com/nodenv/nodenv][nodenv]] to handle multiple node installs, so =nodejs-repl= needs a little help to find the correct one - it's simply calling the nodenv shim rather than node directly.
+** Javascript / Node.js
+
+I use [[https://github.com/nodenv/nodenv][nodenv]] to handle multiple node installs, so ~nodejs-repl~ needs a little help to find the correct one - it's simply calling the nodenv shim rather than node directly.
 
 #+begin_src emacs-lisp
 
@@ -636,7 +724,7 @@ I use [[https://github.com/nodenv/nodenv][nodenv]] to handle multiple node insta
 #+end_src
 
 
-* Go
+** Go
 
 Some of the go packages require various go tools to be installed
 
@@ -647,7 +735,6 @@ Some of the go packages require various go tools to be installed
 | golint         | golint       | go install golang.org/x/lint/golint@latest                       |
 | go-errcheck    | errcheck     | go install github.com/kisielk/errcheck@latest                    |
 | go-gen-test    | gotests      | go install github.com/cweill/gotests/...@latest                  |
-|                |              |                                                                  |
 
 #+begin_src emacs-lisp
   (use-package go-mode        :ensure t)
@@ -665,7 +752,7 @@ Some of the go packages require various go tools to be installed
   ;;(use-package go-dlv         :ensure t)
 #+end_src
 
-* Flycheck / LSP / etc
+** Flycheck / LSP / etc
 "Modern on-the-fly syntax checking extension for GNU Emacs"
 
 #+begin_src emacs-lisp
@@ -703,7 +790,7 @@ Some of the go packages require various go tools to be installed
     (add-hook 'after-init-hook 'global-company-mode))
 #+end_src
 
-* Projectile
+** Projectile
 
 #+begin_src emacs-lisp
   (use-package projectile
@@ -719,18 +806,19 @@ Some of the go packages require various go tools to be installed
     (setq projectile-switch-project-action #'projectile-dired))
 #+end_src
 
-* Git (Magit)
+** Git (Magit)
 
 #+begin_src emacs-lisp
   (use-package magit :ensure t)
 #+end_src
 
-* Terminal
+** Terminal
 
 #+begin_src emacs-lisp
 (use-package vterm :ensure t)
 #+end_src
-* Assorted Other Modes
+
+** Assorted Other Modes
 
 #+begin_src emacs-lisp
 
@@ -757,28 +845,7 @@ Some of the go packages require various go tools to be installed
 
 #+end_src
 
-* Mode Line
-#+begin_src emacs-lisp
-  ;;;(setq mode-line-compact t)
-  (use-package nerd-icons
-    ;; :custom
-    ;; The Nerd Font you want to use in GUI
-    ;; "Symbols Nerd Font Mono" is the default and is recommended
-    ;; but you can use any other Nerd Font if you want
-    ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
-    )
-  (use-package doom-modeline
-    :ensure t
-    :init (doom-modeline-mode 1))
-  (setq doom-modeline-hud nil)
-
-  (setq doom-modeline-vcs-state-faces-alist
-      '((needs-update . (doom-modeline-warning bold))
-        (removed . (doom-modeline-urgent bold))
-        (conflict . (doom-modeline-urgent bold))
-        (unregistered . (doom-modeline-urgent bold))))
-#+end_src
-* Garbage Collection Tuning
+** Garbage Collection Tuning
 
 #+begin_src emacs-lisp
   (use-package gcmh
@@ -788,11 +855,11 @@ Some of the go packages require various go tools to be installed
     (gcmh-mode 1))
 #+end_src
 
-* Local Additions
-This config is common to all my systems, but to allow for per-system customization, try to load  =~/.config/emacs.local/init.el=
+** Local Customizations, Part II
+
+After everything else is loaded, load the local ~init.el~, if it exists.
 
 #+begin_src emacs-lisp
-  ;; try to load per-system customization
   (when (file-exists-p scotty/local-extras-init-file)
     (load scotty/local-extras-init-file))
 #+end_src
