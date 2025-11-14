@@ -849,6 +849,17 @@ Some of the go packages require various go tools to be installed
 
 #+end_src
 
+** AI
+
+Trying out [[https://xenodium.com/][Xenodium]]'s [[https://melpa.org/#/agent-shell][agent-shell]]
+
+#+begin_src emacs-lisp
+  ;; set shell-maker root path for internal shell files
+  (setq shell-maker-root-path scotty/local-state-dir)
+  ;; agent-shell for AI ACP tools
+  (use-package agent-shell :ensure t)
+#+end_src
+
 ** Garbage Collection Tuning
 
 #+begin_src emacs-lisp
