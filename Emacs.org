@@ -460,9 +460,8 @@ Set code indentation to 2.
 
   (setq-default indent-tabs-mode nil)
   (setq-default size-indication-mode t)
-
   (setq-default tab-width scotty/code-indentation)
-  (setq-default standard-indent scotty/code-indentation)
+
   (setq-default apache-indent-level tab-width)
   (setq-default c-basic-indent tab-width)
   (setq-default c-basic-offset tab-width)
