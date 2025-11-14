@@ -133,6 +133,11 @@ Include the warning
   <<warning>>
 #+end_src
 
+** Update Package List
+#+begin_src emacs-lisp
+  (package-refresh-contents)
+#+end_src
+
 ** Generic bits
 
 Set the default directory.
