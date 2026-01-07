@@ -16,9 +16,9 @@ Start both files with a warning that they are now tangled from ~Emacs.org~. This
 
 #+end_src
 
-** Delay Package Setup
+* Tangle Configuration Files
 
-Normally Emacs will make installed packages available after ~early-init.el~ but before ~init.el~; disabling this behavior allows some package config first.
+This file can be converted to ~init.el~ by running ~org-babel-tangle~, or just answer *y* to the *Tangle?* question when saving.
 
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   (setq package-enable-at-startup nil)
