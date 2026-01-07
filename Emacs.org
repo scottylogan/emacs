@@ -20,48 +20,38 @@ Start both files with a warning that they are now tangled from ~Emacs.org~. This
 
 This file can be converted to ~init.el~ by running ~org-babel-tangle~, or just answer *y* to the *Tangle?* question when saving.
 
+----------
+* early-init.el
+
+This file is loaded before the package system, and before the GUI is intialized, so we can use it to configure the package system and the GUI. I configure emacs with no toolbars, no tooltips, no scroll bars, no dialog boxes, and no startup screen. If  it's on a Mac I leave the nenu bar enabled. 
+
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  <<warning>>
+  ;;; early-init.el --- Early initialization -*- lexical-binding: t -*-
+
   (setq package-enable-at-startup nil)
-#+end_src
 
-** Minimal GUI
-
-I like to minimize the GUI bits. I configure emacs with no toolbars, no tooltips, no scroll bars, no dialog boxes, and no startup screen.
-
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   ;; Disable GUI
   (tool-bar-mode -1)
   (tooltip-mode -1)
-  (scroll-bar-mode -1)
+  (scroll-bar-mode nil)
   (setq use-dialog-box nil)
   (setq use-file-dialog nil)
+  (setq-default frame-title-format '("%b  -  GNU Emacs"))
 
   ;; Hide the startup screen
   (setq inhibit-startup-screen t)
-#+end_src
 
-Disable menu bar when running in a terminal, or X, but leave on for MacOS GUI Emacs, otherwise it looks weird.
-
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  ;; disable menu bar when running in a terminal, or X
+  ;; but leave on for MacOS GUI Emacs
   (when (or (not window-system) (eq window-system 'x))
     (menu-bar-mode -1))
-#+end_src
 
-Beeps are annoying, so disable the bell sound.
-
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+  ;; Disable bell sound.
   (setq ring-bell-function 'ignore)
 #+end_src
 
-Set the default window title format
-
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
-  (setq-default frame-title-format '("%b %f"))
-#+end_src
-
-** Shell support - MacOS, Homebrew, and Bash
-
-MacOS ships with an old version of ~bash~ (3.x) in ~/bin~. [[https://brew.sh][Homebrew]] provides a modern bash, but it's installed in different paths on Intel vs Apple Silicon. This sets ~scotty/shell-file-name~ appropriately.
+MacOS  ships with an old version of bash (3.x) in /bin. My ~.profile~ detects things and execs the Homebrew version (if it is installed). When ~vterm~ runs bash, ~.profile~ is not read. So, before much gets started, set ~shell-file-name~
 
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   (defvar scotty/shell-file-name
@@ -73,39 +63,10 @@ MacOS ships with an old version of ~bash~ (3.x) in ~/bin~. [[https://brew.sh][Ho
     (setq shell-file-name scotty/shell-file-name))
 #+end_src
 
-** Server Configuration
-
-Emacs uses ~server~ as the default name for the Emacs server; this can cause problems if you run Emacs as two users (at least it did on my Mac when I used fast user switching between a work and personal account). Setting the server name to the name of the user solves this issue.
+Emacs uses /server/ as the default name for the Emacs server; this can cause problems if you run Emacs as two users (at least it did on my Mac when I used fast user switching between a work and personal account). Setting the server name to the name of the user solves this issue.
 
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   (setq server-name user-login-name)
-#+end_src
-
-** Local State
-
-By default Emacs keeps lots of state files in ~user-emacs-directory~ (~\~/.emacs.d~ or ~\~/.config/emacs~). Since those files are unique to each system, rather than having to exclude all those files from git, I try to keep them somewhere else.
-
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
-  ;; keep state out of the config directory
-  (defvar scotty/local-state-dir "~/.emacs-local"
-    "Location of system-specific state files")
-
-  (make-directory scotty/local-state-dir t)
-#+end_src
-
-*** Native Compilation Cache
-
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
-  (defvar scotty/eln-cache-dir
-          (expand-file-name "eln-cache" scotty/local-state-dir)
-  	"Location of native compilation cache")
-
-  (make-directory scotty/eln-cache-dir t)
-
-  (when (and (fboundp 'startup-redirect-eln-cache)
-    	   (fboundp 'native-comp-available-p)
-    	   (native-comp-available-p))
-    (startup-redirect-eln-cache scotty/eln-cache-dir))
 #+end_src
 
 ----------
