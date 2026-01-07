@@ -2,28 +2,14 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 #+OPTIONS: toc:2
 
-There are two files in this base configuration, ~early-init.el~ and ~init.el~.
+There are two files in this base configuration, ~early-init.el~ and ~init.el~. To export to HTML, use ~org-html-export-to-html~; to export to Github-Flavored Markdown, use ~org-gfm-export-to-markdown~.
 
-* Tangle Configuration Files
+* Warning
 
-This file can be converted to ~early-init.el~ and ~init.el~ by running ~org-babel-tangle~, or just answer /y/ to the /Tangle?/ question when saving.
-
-----------
-
-* Early Configuration - early-init.el
-
-This file is loaded before the package system, and before the GUI is intialized, so we can use it to configure the package system and the GUI.
-
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
-  ;;; early-init.el --- Early initialization -*- lexical-binding: t -*-
-#+end_src
-
-** Warning
-
-Add a warning at the top of this file, so that I don't accidentally edit ~early-init.el~ directly. The code block has a name so it can be reused in ~init.el~.
+Start both files with a warning that they are now tangled from ~Emacs.org~. This code block will be tangled into ~./init.el~, but because itt is named, it can be reused in ~early-init.el~.
 
 #+name: warning
-#+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
+#+begin_src emacs-lisp :eval never
 
   ;; NOTE: this file is now generated from Emacs.org.  Please edit that file
   ;;       in Emacs and this file will be generated automatically!
