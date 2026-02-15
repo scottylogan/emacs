@@ -115,17 +115,6 @@ Re-enable =downcase-region=
 
 #+begin_src emacs-lisp
 
-  (defvar scotty/default-font-size 180
-    "Default font size.")
-  (defvar scotty/default-variable-font-size 180
-    "Default variable (proportional) font size.")
-
-  (defvar scotty/default-mono-font "IosevkaTermSlab Nerd Font Mono"
-    "Default monospaced font.")
-
-  (defvar scotty/default-variable-font "Museo"
-    "Default variable-spaced font.")
-
   ;; keep autosaves, backups, etc. out of the config directory
   (defvar scotty/local-state-dir "~/.emacs-local"
     "Location of system-specific state files.")
@@ -160,6 +149,56 @@ Re-enable =downcase-region=
   ;; try to load early per-system customization
   (when (file-exists-p scotty/local-extras-early-init-file)
     (load scotty/local-extras-early-init-file))
+
+#+end_src
+
+* Custom Fonts / Faces
+
+I don't always have the same fonts installed on every system, so pick from a list.
+
+#+begin_src emacs-lisp
+  (defvar scotty/default-font-size 180
+    "Default font size.")
+
+  (defvar scotty/default-proportional-font-size 180
+    "Default proportional (variable) font size.")
+
+  (defvar scotty/mono-font-options
+    (list
+     "IosevkaTermSlab Nerd Font Mono"
+     "Iosevka Term Slab"
+     "IosevkaTerm Nerd Font Mono"
+     "Inconsolata"
+     "Menlo"
+     "Monaco"
+     "RobotoMono Nerd Font"
+     "RobotoMono Nerd Font Mono"
+     "SF Mono")
+    "Monospaced font options.")
+
+  (defvar scotty/proportional-font-options
+    (list
+     "Museo Slab"
+     "Museo"
+     "Times")
+    "Proportional font options.")
+
+  (defun scotty/select-usable-font (font-list)
+    "Select a usable font from a list of fonts"
+    (nth 2 (split-string
+            (caar
+             (mapcar
+              '(lambda (f)
+                 (x-list-fonts (string-join (list "*" f "normal" "normal" "*") "-"))) font-list))
+            "-")))
+
+  (defvar scotty/default-mono-font
+    (scotty/select-usable-font scotty/mono-font-options)
+    "Default monospaced font.")
+
+  (defvar scotty/default-proportional-font
+    (scotty/select-usable-font scotty/proportional-font-options)
+    "Default proportional-spaced font.")
 
 #+end_src
 
@@ -269,7 +308,7 @@ Customize frames (windows) when running in a GUI
     "Configure new FRAMEs."
     ;; default Latin font
     (set-face-attribute 'default frame
-                        :family scotty/default-mono-font
+                        :family scotty/default-proportional-font
                         :slant 'normal
                         :height (cond ((< (display-pixel-height) 1550) 160)
                                       ((>= (display-pixel-height) 2160) 300)
@@ -496,8 +535,8 @@ I am using the =IosevkaTermslab Nerd Font Mono= and =Museo= fonts for this confi
 
   ;; Set the variable pitch face
   (set-face-attribute 'variable-pitch nil
-                      :font scotty/default-variable-font
-                      :height scotty/default-font-size
+                      :font scotty/default-proportional-font
+                      :height scotty/default-proportional-font-size
                       :slant 'normal)
 
 #+end_src
