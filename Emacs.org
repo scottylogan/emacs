@@ -1,5 +1,6 @@
-#+title: Scotty's Emacs Configuration
+#+TITLE: Scotty's Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+OPTIONS: title:t
 #+OPTIONS: toc:2
 
 There are three files in this base configuration, ~early-init.el~, ~init.el~, and ~gui.el~. To export to HTML, use ~org-html-export-to-html~; to export to Github-Flavored Markdown, use ~org-gfm-export-to-markdown~.
@@ -381,6 +382,7 @@ Let's auto-update the packages!
 #+end_src
 
 * Shell Environment
+
 On MacOS Emacs.app is usually started from outside the shell, so PATH is probably not set up properly. While /bin/bash on Linux is usually up-to-date, it's out of date on MacOS. [[https://brew.sh][Homebrew]] provides a modern bash, but it's installed in different paths on Intel vs Apple Silicon. =scotty/exec-path-from-shell-setup= sets =exec-path-from-shell-shell-name= and =exec-path-from-shell-arguments= appropriately. To improve the performance of =exec-path-from-shell= I have it run =bash= with the =-l= (login shell) option, not =-i= (interactive), since all it really needs is the PATH and some other environment variables.
 
 #+begin_src emacs-lisp
@@ -510,9 +512,7 @@ Use some of =doom-modeline=
 
 #+end_src
 
-
-
-* Autosaving and Backups
+* Autosave Files, Backups, and Other State
 
 By default Emacs will autosave files in the current directory as =#filename#=; when a file is saved it will also create a backup of the original file as =filename~=. Rather than have these scattered all over the filesystem, keep them all in one place.
 
@@ -583,7 +583,29 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
 
 #+end_src
 
-* Places and Minibuffer History
+** Games
+
+Some games, like bubbles, use gamegrid, which stores scores in a =games= subdirectory, by default in the same directory as the =.emacs= file. Let's keep it local for now, and also disable shared score directories:
+
+#+begin_src emacs-lisp
+
+  (setq gamegrid-user-score-file-directory
+        (expand-file-name "games" scotty/local-state-dir))
+  (setq shared-game-score-directory nil)
+
+#+end_src
+
+** eShell
+
+#+begin_src emacs-lisp
+
+  (setq eshell-directory-name
+        (expand-file-name "eshell" scotty/local-state-dir))
+
+#+end_src
+
+
+** Places and Minibuffer History
 
 By default, Emacs will store the =places= file, tracking the current position in each file, and the history file, storing the history of minibuffer commands, in the =user-emacs-directory= (usually =~/.emacs.d= or =~/.config/emacs=). Rather than excluding these with a =.gitignore= file, just keep them local to each system.
 
@@ -659,6 +681,21 @@ Emacs normally won't automatically revert buffers when the underlying file has b
 #+begin_src emacs-lisp
   (use-package ox-gfm
     :ensure t)
+#+end_src
+
+GFM export doesn't use the title, so it needs this snippet from [[https://emacs.stackexchange.com/questions/75888/exporting-
+     │ org-mode-to-markdown-does-not-render-the-title][Emacs Stack Exchange]].
+
+#+begin_src emacs-lisp
+
+  (defun org-md-export-title-advice (orig-fun &rest args)
+    (let* ((res (apply orig-fun args))
+           (title (org-element-interpret-data (plist-get (nth 1 args) :title))))
+      (concat "# " title "\n"
+              res)))
+
+  (advice-add 'org-md-template :around #'org-md-export-title-advice)
+
 #+end_src
 
 ** Markdown
@@ -939,26 +976,30 @@ Use =vterm= for a terminal
 * Garbage Collection Tuning
 
 #+begin_src emacs-lisp
-  ;; garbage collection tuning
+
   (use-package gcmh
      :ensure t
      :diminish gcmh-mode
      :config
      (gcmh-mode 1))
+
 #+end_src
 
 * Local Additions
+
 This config is common to all my systems, but to allow for per-system customization, try to load  =~/.config/emacs.local/init.el=
 
 #+begin_src emacs-lisp
-  ;; try to load per-system customization
+
   (when (file-exists-p scotty/local-extras-init-file)
     (load scotty/local-extras-init-file))
+
 #+end_src
 
 *  Things that did not work
 
 ** outline-toc-mode
+
 Should have created a side window with just the headers in org-mode, but just displayed the same buffer
 
 #+begin_src emacs-lisp
