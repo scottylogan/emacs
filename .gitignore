@@ -1,11 +1,3 @@
-elpa/
-early-init.el
-init.el
-OLD/
-tramp
-projectile-bookmarks.eld
-places
-.last-package-update-day
-.lsp-session-v1
-.org-id-locations
-projects
+*
+!Emacs.org
+!LICENSE
