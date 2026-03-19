@@ -305,6 +305,133 @@ Set the default directory.
 
 #+end_src
 
+** Autosave Files, Backups, and Other State
+
+By default Emacs will autosave files in the current directory as =#filename#=; when a file is saved it will also create a backup of the original file as =filename~=. Rather than have these scattered all over the filesystem, keep them all in one place.
+
+#+begin_src emacs-lisp
+
+  (defvar scotty/autosave-dir
+    (expand-file-name "autosave/" scotty/local-state-dir)
+    "Location of autosave files")
+
+  (make-directory scotty/autosave-dir t)
+
+  (setq auto-save-file-name-transforms `((".*" ,scotty/autosave-dir t)))
+
+  (setq auto-save-list-file-prefix
+        (expand-file-name ".saves-" scotty/autosave-dir))
+
+  (defvar scotty/backup-dir
+    (expand-file-name "backup/" scotty/local-state-dir)
+    "Location of backup files")
+
+  (make-directory scotty/backup-dir t)
+
+  ;; (setq backup-directory-alist (list (cons "." scotty/backup-dir)))
+  (setq backup-directory-alist `(("." . ,scotty/backup-dir)))
+  (setq backup-by-copying t               ; don't clobber symlinks
+        version-control t                 ; use versioned backups
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2)
+
+  (defvar scotty/transient-dir
+    (expand-file-name "transient/" scotty/local-state-dir)
+    "Location of autosave files")
+
+  (make-directory scotty/transient-dir t)
+
+  (setq transient-history-file
+        (expand-file-name "history.el" scotty/transient-dir))
+
+  (setq transient-levels-file
+        (expand-file-name "levels.el" scotty/transient-dir))
+
+  (setq transient-values-file
+        (expand-file-name "values.el" scotty/transient-dir))
+
+  (setq tramp-persistency-file-name
+        (expand-file-name "tramp" scotty/local-state-dir))
+
+  (setq bookmark-default-file
+        (expand-file-name "bookmarks" scotty/local-state-dir))
+  (setq bookmark-file bookmark-default-file)
+  (setq bookmark-old-default-file bookmark-default-file)
+
+  (setq diary-file
+        (expand-file-name "diary" scotty/local-state-dir))
+
+  (setq nsm-settings-file
+        (expand-file-name "network-security.data" scotty/local-state-dir))
+  (setq org-id-locations-file
+        (expand-file-name "org-id-locations" scotty/local-state-dir))
+  (setq project-list-file
+        (expand-file-name "projects" scotty/local-state-dir))
+  (setq projectile-known-projects-file
+        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
+
+  (setq server-auth-dir
+        (expand-file-name "server/" scotty/local-state-dir))
+
+  (setq auto-package-update-last-update-day-filename
+        (expand-file-name "last-package-update-day" scotty/local-state-dir))
+  (setq auto-package-update-last-update-day-path
+        (expand-file-name "last-package-update-day" scotty/local-state-dir))
+
+
+  (setq lsp-session-file
+        (expand-file-name "lsp-session-v1" scotty/local-state-dir))
+
+#+end_src
+
+*** Games
+
+Some games, like bubbles, use gamegrid, which stores scores in a =games= subdirectory, by default in the same directory as the =.emacs= file. Let's keep it local for now, and also disable shared score directories:
+
+#+begin_src emacs-lisp
+
+  (setq gamegrid-user-score-file-directory
+        (expand-file-name "games" scotty/local-state-dir))
+  (setq shared-game-score-directory nil)
+
+#+end_src
+
+*** eShell
+
+#+begin_src emacs-lisp
+
+  (setq eshell-directory-name
+        (expand-file-name "eshell" scotty/local-state-dir))
+
+#+end_src
+
+
+*** Places and Minibuffer History
+
+By default, Emacs will store the =places= file, tracking the current position in each file, and the history file, storing the history of minibuffer commands, in the =user-emacs-directory= (usually =~/.emacs.d= or =~/.config/emacs=). Rather than excluding these with a =.gitignore= file, just keep them local to each system.
+
+#+begin_src emacs-lisp
+
+  (defvar scotty/history-file
+    (expand-file-name "history" scotty/local-state-dir)
+    "Location of minibuffer history file")
+
+  (setq savehist-file scotty/history-file)
+  (setq history-length 25)
+  (savehist-mode 1)
+
+  ;; Remember and restore the last cursor location of opened files
+  (defvar scotty/places-file
+    (expand-file-name "places" scotty/local-state-dir)
+    "Location of file position file")
+
+  (save-place-mode 1)
+  (setq save-place-file scotty/places-file)
+  (setq save-place-forget-unreadable-files nil)
+
+#+end_src
+
 ** Generic bits
 
 Add newlines at the end of files, highlight trailing spaces, and highlight the end of buffer.
@@ -510,124 +637,6 @@ Use some of =doom-modeline=
        (removed . (doom-modeline-urgent bold))
        (conflict . (doom-modeline-urgent bold))
        (unregistered . (doom-modeline-urgent bold)))))
-
-#+end_src
-
-* Autosave Files, Backups, and Other State
-
-By default Emacs will autosave files in the current directory as =#filename#=; when a file is saved it will also create a backup of the original file as =filename~=. Rather than have these scattered all over the filesystem, keep them all in one place.
-
-#+begin_src emacs-lisp
-
-  (defvar scotty/autosave-dir
-    (expand-file-name "autosave/" scotty/local-state-dir)
-    "Location of autosave files")
-
-  (make-directory scotty/autosave-dir t)
-
-  (setq auto-save-file-name-transforms `((".*" ,scotty/autosave-dir t)))
-
-  (setq auto-save-list-file-prefix
-        (expand-file-name ".saves-" scotty/autosave-dir))
-
-  (defvar scotty/backup-dir
-    (expand-file-name "backup/" scotty/local-state-dir)
-    "Location of backup files")
-
-  (make-directory scotty/backup-dir t)
-
-  ;; (setq backup-directory-alist (list (cons "." scotty/backup-dir)))
-  (setq backup-directory-alist `(("." . ,scotty/backup-dir)))
-  (setq backup-by-copying t               ; don't clobber symlinks
-        version-control t                 ; use versioned backups
-        delete-old-versions t
-        kept-new-versions 6
-        kept-old-versions 2)
-
-  (defvar scotty/transient-dir
-    (expand-file-name "transient/" scotty/local-state-dir)
-    "Location of autosave files")
-
-  (make-directory scotty/transient-dir t)
-
-  (setq transient-history-file
-        (expand-file-name "history.el" scotty/transient-dir))
-
-  (setq transient-levels-file
-        (expand-file-name "levels.el" scotty/transient-dir))
-
-  (setq transient-values-file
-        (expand-file-name "values.el" scotty/transient-dir))
-
-  (setq tramp-persistency-file-name
-        (expand-file-name "tramp" scotty/local-state-dir))
-
-  (setq bookmark-default-file
-        (expand-file-name "bookmarks" scotty/local-state-dir))
-  (setq bookmark-file bookmark-default-file)
-  (setq bookmark-old-default-file bookmark-default-file)
-
-  (setq diary-file
-        (expand-file-name "diary" scotty/local-state-dir))
-
-  (setq nsm-settings-file
-        (expand-file-name "network-security.data" scotty/local-state-dir))
-  (setq org-id-locations-file
-        (expand-file-name ".org-id-locations" scotty/local-state-dir))
-  (setq project-list-file
-        (expand-file-name "projects" scotty/local-state-dir))
-  (setq projectile-known-projects-file
-        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
-
-  (setq server-auth-dir
-        (expand-file-name "server/" scotty/local-state-dir))
-
-#+end_src
-
-** Games
-
-Some games, like bubbles, use gamegrid, which stores scores in a =games= subdirectory, by default in the same directory as the =.emacs= file. Let's keep it local for now, and also disable shared score directories:
-
-#+begin_src emacs-lisp
-
-  (setq gamegrid-user-score-file-directory
-        (expand-file-name "games" scotty/local-state-dir))
-  (setq shared-game-score-directory nil)
-
-#+end_src
-
-** eShell
-
-#+begin_src emacs-lisp
-
-  (setq eshell-directory-name
-        (expand-file-name "eshell" scotty/local-state-dir))
-
-#+end_src
-
-
-** Places and Minibuffer History
-
-By default, Emacs will store the =places= file, tracking the current position in each file, and the history file, storing the history of minibuffer commands, in the =user-emacs-directory= (usually =~/.emacs.d= or =~/.config/emacs=). Rather than excluding these with a =.gitignore= file, just keep them local to each system.
-
-#+begin_src emacs-lisp
-
-  (defvar scotty/history-file
-    (expand-file-name "history" scotty/local-state-dir)
-    "Location of minibuffer history file")
-
-  (setq savehist-file scotty/history-file)
-  (setq history-length 25)
-  (savehist-mode 1)
-
-  ;; Remember and restore the last cursor location of opened files
-  (defvar scotty/places-file
-    (expand-file-name "places" scotty/local-state-dir)
-    "Location of file position file")
-
-  (save-place-mode 1)
-  (setq save-place-file scotty/places-file)
-  (setq save-place-forget-unreadable-files nil)
 
 #+end_src
 
