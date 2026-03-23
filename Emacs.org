@@ -867,41 +867,23 @@ Some of the go packages require various go tools to be installed
 
 | Package        | Tool         | Tool Install                                                     |
 |----------------+--------------+------------------------------------------------------------------|
-| go-tag         | gomodifytags | go install github.com/fatih/gomodifytags@latest                  |
-| go-fill-struct | fillstruct   | go install github.com/davidrjenni/reftools/cmd/fillstruct@latest |
 | golint         | golint       | go install golang.org/x/lint/golint@latest                       |
 | go-errcheck    | errcheck     | go install github.com/kisielk/errcheck@latest                    |
-| go-gen-test    | gotests      | go install github.com/cweill/gotests/...@latest                  |
-|                |              |                                                                  |
 
 #+begin_src emacs-lisp
   (use-package go-mode
+    :defer t
     :mode "\\.go\\'")
 
-  (use-package go-tag
-    :hook go-mode-hook)
-
-  ;; alternative
-  ;;  (use-package go-add-tags
-  ;;    :hook go-mode-hook)
-
   (use-package go-eldoc
-    :hook go-mode-hook)
-
-  (use-package go-fill-struct
-    :hook go-mode-hook)
+    :hook (go-mode . go-eldoc-setup)
+    :after (go-mode))
 
   (use-package go-playground
-    :hook go-mode-hook)
-
-  (use-package golint
-    :hook go-mode-hook)
-
-  (use-package go-errcheck
-    :hook go-mode-hook)
+    :after (go-mode))
 
   (use-package go-gen-test
-    :hook go-mode-hook)
+    :after (go-mode))
 
   (use-package go-projectile
     :hook go-mode-hook)
