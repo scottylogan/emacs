@@ -748,10 +748,10 @@ Default to [[https://opensource.org/license/mit][MIT]] license
 ** Mermaid Diagrams
 
 #+begin_src emacs-lisp
-  (use-package mermaid-mode
-    :hook markdown-mode-hook)
-  (use-package mermaid-docker-mode
-    :hook markdown-mode-hook)
+;;  (use-package mermaid-mode
+;;    :hook markdown-mode-hook)
+;;  (use-package mermaid-docker-mode
+;;    :hook markdown-mode-hook)
 #+end_src
 
 
