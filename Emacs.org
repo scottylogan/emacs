@@ -473,6 +473,9 @@ Re-enable =downcase-region=
 By default, emacs will install [[https://elpa.gnu.org/][Elpa]]  packages in the same location as =init.el=, in a subdirectory called =elpa=. I'd rather store them outside the version-controlled config, so those directories need to be configured (and created) before =package= / =use-package= are used.
 
 #+begin_src emacs-lisp
+  ;; upgrade built-in packages
+  (setq package-install-upgrade-built-in t)
+
   ;; keep packages outside the config repo
   (setq package-gnupghome-dir
         (expand-file-name "elpa/gnupg" scotty/local-state-dir))
@@ -510,6 +513,10 @@ Let's auto-update the packages!
     (setq auto-package-update-delete-old-versions t)
     (setq auto-package-update-hide-results t)
     (auto-package-update-maybe))
+
+  ;; install pkg-info
+  (use-package pkg-info
+    :ensure t)
 #+end_src
 
 * Shell Environment
@@ -610,8 +617,7 @@ Use =diminish= to keep mode line tidy
                       ivy-mode
                       company-mode
                       auto-revert-mode
-                      lsp-mode
-                      eldoc-mode)))
+                      lsp-mode)))
 #+end_src
 
 Use nerd fonts for symbols in mode line.
@@ -684,6 +690,8 @@ Emacs normally won't automatically revert buffers when the underlying file has b
 #+begin_src emacs-lisp
 
   (use-package org-superstar
+    :ensure t
+    :defer t
     :after org
     :hook (org-mode . org-superstar-mode))
 
@@ -693,7 +701,8 @@ Emacs normally won't automatically revert buffers when the underlying file has b
 
 #+begin_src emacs-lisp
   (use-package ox-gfm
-    :ensure t)
+    :ensure t
+    :defer t)
 #+end_src
 
 GFM export doesn't use the title, so it needs this snippet from [[https://emacs.stackexchange.com/questions/75888/exporting-
@@ -786,29 +795,40 @@ Default to [[https://opensource.org/license/mit][MIT]] license
 
 #+begin_src emacs-lisp
   (use-package flycheck
-    :init (global-flycheck-mode))
+    :ensure t
+    :config
+    (add-hook 'after-init-hook #'global-flycheck-mode))
 
   (use-package lsp-mode
+    :ensure t
     :config
     ;; set prefix for lsp-command-keymap
     (setq lsp-keymap-prefix "C-c l")
+    :after go-mode
     :hook
     (go-mode . lsp)
     :commands (lsp lsp-deferred))
 
   (use-package lsp-ui
+    :ensure t
+    :defer t
     :commands lsp-ui-mode)
 
   (use-package lsp-ivy
+    :ensure t
+    :defer t
     :commands lsp-ivy-workspace-symbol)
 
   (use-package lsp-treemacs
+    :ensure t
+    :defer t
     :commands lsp-treemacs-errors-list)
 
   ;;  (use-package dap-mode)
 
   (use-package company
     :ensure t
+    :defer t
     :init
     (add-hook 'after-init-hook 'global-company-mode))
 #+end_src
@@ -818,6 +838,7 @@ Default to [[https://opensource.org/license/mit][MIT]] license
 #+begin_src emacs-lisp
   (use-package projectile
     :ensure t
+    :defer t
     :diminish projectile-mode
     :bind-keymap
     ("s-p" . projectile-command-map)
@@ -833,7 +854,8 @@ Default to [[https://opensource.org/license/mit][MIT]] license
 
 #+begin_src emacs-lisp
   (use-package magit
-    :ensure t)
+    :ensure t
+    :defer t)
 #+end_src
 
 ** Javascript / Node.js
@@ -843,23 +865,35 @@ I use [[https://github.com/nodenv/nodenv][nodenv]] to handle multiple node insta
 #+begin_src emacs-lisp
 
   (use-package js2-mode
+    :ensure t
+    :defer t
     :mode "\\.js\\'")
 
   (use-package nodejs-repl
+    :ensure t
+    :defer t
     :hook js2-mode-hook
     :config
     (setq nodejs-repl-command (expand-file-name "~/.nodenv/shims/node")))
 
   (use-package npm-mode
+    :ensure t
+    :defer t
     :hook js2-mode-hook)
 
   (use-package js-doc
+    :ensure t
+    :defer t
     :hook js2-mode-hook)
 
   (use-package mocha
+    :ensure t
+    :defer t
     :hook js2-mode-hook)
 
   (use-package typescript-mode
+    :ensure t
+    :defer t
     :mode "\\.ts\\'")
 #+end_src
 
@@ -875,24 +909,29 @@ Some of the go packages require various go tools to be installed
 
 #+begin_src emacs-lisp
   (use-package go-mode
+    :ensure t
     :defer t
     :mode "\\.go\\'")
 
-  (use-package go-eldoc
-    :hook (go-mode . go-eldoc-setup)
-    :after (go-mode))
-
   (use-package go-playground
+    :ensure t
+    :defer t
     :after (go-mode))
 
   (use-package go-gen-test
+    :ensure t
+    :defer t
     :after (go-mode))
 
   (use-package go-projectile
+    :ensure t
+    :defer t
     :hook go-mode-hook)
 
   ;; delve debugger integration
   ;; (use-package go-dlv
+  ;;   :ensure t
+  ;;   :defer t
   ;;   :hook go-mode-hook)
 #+end_src
 
@@ -918,6 +957,8 @@ Of course Emacs has an X.509 mode!
 
   ;; pretty certificates
   (use-package x509-mode
+    :ensure t
+    :defer t
     :mode ("\\.crt\\'" "\\.pem\\'" "\\.cert\\'"))
 
 #+end_src
@@ -929,9 +970,13 @@ Of course Emacs has an X.509 mode!
 #+begin_src emacs-lisp
   ;; startup files
   (use-package systemd
+    :ensure t
+    :defer t
     :mode ("\\.unit\\'" "\\.socket\\'" "\\.timer\\'"))
 
   (use-package launchctl
+    :ensure t
+    :defer t
     :defer t)
 #+end_src
 
@@ -940,30 +985,45 @@ Of course Emacs has an X.509 mode!
 #+begin_src emacs-lisp
 
   (use-package apache-mode
+    :ensure t
     :defer t)
 
   (use-package apt-sources-list
+    :ensure t
     :defer t)
 
   (use-package dockerfile-mode
+    :ensure t
+    :defer t
     :mode ("Dockerfile"))
 
   (use-package ini-mode
+    :ensure t
+    :defer t
     :mode "\\.ini\\'")
 
   (use-package json-mode
+    :ensure t
+    :defer t
     :mode "\\.json\\'")
 
   (use-package yaml-mode
+    :ensure t
+    :defer t
     :mode ("\\.yaml\\'" "\\.yml'"))
 
   (use-package terraform-mode
+    :ensure t
+    :defer t
     :mode ("\\.tf\\'" "\\.tfvars\\'"))
   (use-package terraform-doc
+    :ensure t
     :defer t)
   (use-package vagrant
+    :ensure t
     :defer t)
   (use-package hcl-mode
+    :ensure t
     :defer t)
 
 #+end_src
@@ -975,7 +1035,8 @@ Use =vterm= for a terminal
 #+begin_src emacs-lisp
 
   (use-package vterm
-    :ensure t)
+    :ensure t
+    :defer t)
 
 #+end_src
 
@@ -986,6 +1047,7 @@ Use =vterm= for a terminal
 
   (use-package gcmh
      :ensure t
+     :defer t
      :diminish gcmh-mode
      :config
      (gcmh-mode 1))
