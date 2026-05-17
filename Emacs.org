@@ -584,9 +584,10 @@ Aw, cute little catppuccin!
 #+begin_src emacs-lisp
   (use-package catppuccin-theme
     :ensure t
+    :custom
+    (catppuccin-flavor 'mocha)
     :init
     (load-theme 'catppuccin :noconfirm)
-    (setq catppuccin-flavor 'mocha)
     (catppuccin-reload))
 #+end_src
 
@@ -756,8 +757,8 @@ Default to [[https://opensource.org/license/mit][MIT]] license
   ;; License and Header Template
   (use-package lice
     :ensure t
-    :init
-    (setq lice:default-license "mit"))
+    :custom
+    (lice:default-license "mit"))
 #+end_src
 
 ** Mermaid Diagrams
@@ -847,12 +848,12 @@ Default to [[https://opensource.org/license/mit][MIT]] license
     :bind-keymap
     ("s-p" . projectile-command-map)
     ("C-c p" . projectile-command-map)
-   :init
-    (projectile-mode +1)
-    (when (file-directory-p "~/src")
-      (setq projectile-project-search-path '("~/src")))
-    (setq projectile-switch-project-action #'projectile-dired))
-#+end_src
+    :custom
+    (projectile-switch-project-action #'projectile-dired)
+    (projectile-project-search-path '("~/src"))
+    :init
+    (projectile-mode +1))
+ #+end_src
 
 ** Git (Magit)
 
@@ -870,11 +871,12 @@ Default to [[https://opensource.org/license/mit][MIT]] license
     :defer t
     :config
     (require 'gptel-integrations)
-    (setq gptel-default-mode 'markdown-mode
-          gptel-use-curl t
-          gptel-use-tools t
-          gptel-confirm-tool-calls 'always
-          gptel-backend (gptel-make-gh-copilot "Copilot" :stream t)))
+    :custom
+    (gptel-default-mode 'markdown-mode)
+    (gptel-use-curl t)
+    (gptel-use-tools t)
+    (gptel-confirm-tool-calls 'always)
+    (gptel-backend (gptel-make-gh-copilot "Copilot" :stream t)))
 #+end_src
 
 First, we need =mcp=:
@@ -900,9 +902,9 @@ First, we need =mcp=:
   (use-package copilot-chat
     :ensure t
     :defer t
-    :config
-    (setq copilot-chat-frontend 'markdown
-          copilot-chat-backend 'curl))
+    :custom
+    (copilot-chat-frontend 'markdown)
+    (copilot-chat-backend 'curl))
 #+end_src
 
 but is incompatible with =copilot=, which provides Copilot completion
@@ -936,8 +938,8 @@ I use [[https://github.com/nodenv/nodenv][nodenv]] to handle multiple node insta
     :ensure t
     :defer t
     :hook js2-mode-hook
-    :config
-    (setq nodejs-repl-command (expand-file-name "~/.nodenv/shims/node")))
+    :custom
+    (nodejs-repl-command (expand-file-name "~/.nodenv/shims/node")))
 
   (use-package npm-mode
     :ensure t
