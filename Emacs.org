@@ -1023,6 +1023,19 @@ Of course Emacs has an X.509 mode!
 
 #+end_src
 
+*** HTML
+
+HTML5
+
+#+begin_src emacs-lisp
+
+  ;; pretty certificates
+  (use-package web-mode
+    :ensure t
+    :mode (("\\.html\\'" . web-mode)))
+
+#+end_src
+
 *** Startup Files
 
 =systemd= and =launchd=
