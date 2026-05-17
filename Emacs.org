@@ -386,6 +386,9 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
   (setq lsp-session-file
         (expand-file-name "lsp-session-v1" scotty/local-state-dir))
 
+  (make-directory (expand-file-name "url" scotty/local-state-dir) t)
+  (setq url-cookie-file (expand-file-name "url/cookie" scotty/local-state-dir))
+
 #+end_src
 
 *** Games
