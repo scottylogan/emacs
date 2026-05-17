@@ -1005,6 +1005,9 @@ Some of the go packages require various go tools to be installed
   (use-package ollama-buddy
     :ensure t
     :defer t
+    :custom
+    (ollama-buddy-sessions-directory (expand-file-name "ollama-buddy-sessions" scotty/local-state-dir))
+    (ollama-buddy-user-prompts-directory (expand-file-name "ollama-buddy-user-prompts" scotty/local-state-dir))
     :bind
     ("C-c o" . ollama-buddy-menu)
     ("C-c O" . ollama-buddy-transient-menu))
