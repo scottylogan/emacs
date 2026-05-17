@@ -788,6 +788,7 @@ Default to [[https://opensource.org/license/mit][MIT]] license
   (setq-default js-indent-level tab-width)
   (setq-default sh-basic-offset tab-width)
   (setq-default sh-indentation tab-width)
+  (setq-default web-mode-markup-indent-offset tab-width)
   (setq-default web-mode-code-indent-offset tab-width)
 
 #+end_src
