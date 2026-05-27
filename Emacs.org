@@ -1000,6 +1000,12 @@ Some of the go packages require various go tools to be installed
   ;;   :hook go-mode-hook)
 #+end_src
 
+Also, add =gofmt-before-save= to the =before-save-hook= to cleanup Go files automatically
+
+#+begin_src emacs-lisp
+  (add-hook 'before-save-hook 'gofmt-before-save)
+#+end_src
+
 ** AI / Ollama
 
 [[https://github.com/captainflasmr/ollama-buddy/][ollama-buddy]] interfaces Emacs with a local Ollama server.
