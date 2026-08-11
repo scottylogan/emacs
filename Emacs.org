@@ -28,7 +28,7 @@ This file can be converted to ~init.el~ by running ~org-babel-tangle~, or just a
 ----------
 * early-init.el
 
-This file is loaded before the package system, and before the GUI is intialized, so we can use it to configure the package system and the GUI. I configure emacs with no toolbars, no tooltips, no scroll bars, no dialog boxes, and no startup screen. If  it's on a Mac I leave the nenu bar enabled. 
+This file is loaded before the package system, and before the GUI is intialized, so we can use it to configure the package system and the GUI. I configure emacs with no toolbars, no tooltips, no scroll bars, no dialog boxes, and no startup screen. If  it's on a Mac I leave the nenu bar enabled.
 
 #+begin_src emacs-lisp :tangle ./early-init.el :noweb yes
   ;;; early-init.el --- Early initialization -*- lexical-binding: t -*-
@@ -372,8 +372,8 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
         (expand-file-name "org-id-locations" scotty/local-state-dir))
   (setq project-list-file
         (expand-file-name "projects" scotty/local-state-dir))
-  (setq projectile-known-projects-file
-        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
+;;  (setq projectile-known-projects-file
+;;        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
 
   (setq server-auth-dir
         (expand-file-name "server/" scotty/local-state-dir))
@@ -852,6 +852,11 @@ Default to [[https://opensource.org/license/mit][MIT]] license
     :custom
     (projectile-switch-project-action #'projectile-dired)
     (projectile-project-search-path '("~/src"))
+    (projectile-frecency-file
+     (expand-file-name "projectile-frecency.eld" scotty/local-state-dir))
+    (projectile-known-projects-file
+     (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
+
     :init
     (projectile-mode +1))
  #+end_src
