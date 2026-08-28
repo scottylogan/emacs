@@ -267,6 +267,11 @@ Set the default directory.
 
 #+begin_src emacs-lisp
   (setq default-directory "~/")
+
+  ;; needed for batch mode - emacs --batch -l ~/.config/emacs/init.el
+  (unless user-init-file
+    (setq user-init-file (expand-file-name "init.el" user-emacs-directory)))
+
 #+end_src
 
 ** Custom Variables
