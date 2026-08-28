@@ -285,7 +285,7 @@ Set the default directory.
   (make-directory scotty/local-state-dir t)
 
   (defvar scotty/hostname
-    (car (split-string system-name "\\."))
+    (car (split-string (system-name) "\\."))
     "Short hostname.")
 
   (defvar scotty/local-extras-dir
