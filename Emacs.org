@@ -741,6 +741,19 @@ Emacs normally won't automatically revert buffers when the underlying file has b
 
 * Documentation
 
+** PDF (and other files)
+
+[[https://codeberg.org/MonadicSheep/emacs-reader][emacs-reader]] supports viewing PDFs, ePUBs, .docx, etc. via [[https://mupdf.com/][mupdf]].
+
+#+begin_src emacs-lisp
+  (setq package-vc-allow-build-commands t)
+
+  (use-package reader
+    :vc (:url "https://codeberg.org/MonadicSheep/emacs-reader"
+              :make "all"))
+
+#+end_src
+
 ** Org-Mode
 
 #+begin_src emacs-lisp
