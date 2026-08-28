@@ -389,8 +389,11 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
         (expand-file-name "org-id-locations" scotty/local-state-dir))
   (setq project-list-file
         (expand-file-name "projects" scotty/local-state-dir))
-;;  (setq projectile-known-projects-file
-;;        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
+  (setq projectile-known-projects-file
+        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
+
+  (setq recentf-save-file
+        (expand-file-name "recentf.eld" scotty/local-state-dir))
 
   (setq server-auth-dir
         (expand-file-name "server/" scotty/local-state-dir))
