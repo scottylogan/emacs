@@ -891,13 +891,11 @@ Default to [[https://opensource.org/license/mit][MIT]] license
 
   (use-package lsp-mode
     :ensure t
-    :config
-    ;; set prefix for lsp-command-keymap
+    :commands (lsp lsp-deferred)
+    :init
     (setq lsp-keymap-prefix "C-c l")
-    :after go-mode
-    :hook
-    (go-mode . lsp)
-    :commands (lsp lsp-deferred))
+    :config
+    (lsp-enable-which-key-integration t))
 
   (use-package lsp-ui
     :ensure t
@@ -1066,7 +1064,10 @@ Some of the go packages require various go tools to be installed
   (use-package go-mode
     :ensure t
     :defer t
-    :mode "\\.go\\'")
+    :mode "\\.go\\'"
+    :hook ((go-mode . lsp-deferred)
+           (before-save . lsp-format-buffer)
+           (before-save . lsp-organize-imports)))
 
   (use-package go-playground
     :ensure t
@@ -1134,7 +1135,6 @@ HTML5
 
 #+begin_src emacs-lisp
 
-  ;; pretty certificates
   (use-package web-mode
     :ensure t
     :mode (("\\.html\\'" . web-mode)))
@@ -1154,7 +1154,6 @@ HTML5
 
   (use-package launchctl
     :ensure t
-    :defer t
     :defer t)
 #+end_src
 
