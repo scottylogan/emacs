@@ -309,11 +309,15 @@ Set the default directory.
   (when (file-exists-p custom-file)
     (load custom-file))
 
-  (setq gui-init-file (expand-file-name "gui.el" user-emacs-directory))
+  (defvar scotty/gui-init-file
+    (expand-file-name "gui.el" user-emacs-directory)
+    "GUI customization init file.")
+
+;;  (setq gui-init-file (expand-file-name "gui.el" user-emacs-directory))
 
   ;; try to load gui.el
-  (when (and window-system (file-exists-p gui-init-file))
-    (load gui-init-file))
+  (when (and window-system (file-exists-p scotty/gui-init-file))
+    (load scotty/gui-init-file))
 
   ;; try to load early per-system customization
   (when (file-exists-p scotty/local-extras-early-init-file)
