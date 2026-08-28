@@ -621,11 +621,11 @@ Aw, cute little catppuccin!
 
   ;; show line numbers in wide windows
   (setq-default display-line-numbers (> (frame-width) 80))
-  (global-display-line-numbers-mode t)
+  (global-display-line-numbers-mode -1)
 
-  ;; Disable line numbers for some modes
-  (dolist (mode '(org-mode-hook term-mode-hook vterm-mode-hook eshell-mode-hook))
-    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  ;; show line numbers in programming modes
+  (add-hook 'prog-mode-hook #'display-line-numbers-mode)
+
 #+end_src
 
 ** Mode Line
