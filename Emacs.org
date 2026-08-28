@@ -123,8 +123,8 @@ I don't always have the same fonts installed on every system, so pick from a lis
             (caar ; get the first item of the first list from the list of fonts
              (delq nil ; remove all the nil values from the list of fonts
                    (mapcar ; get all the font names that match all the fonts in font-list
-                    '(lambda (f) ; call x-list-fonts to get every normal font name available for font "f"
-                       (x-list-fonts (string-join (list "*" f "normal" "normal" "*") "-"))) font-list)))
+                    (lambda (f) ; call x-list-fonts to get every normal font name available for font "f"
+                      (x-list-fonts (string-join (list "*" f "normal" "normal" "*") "-"))) font-list)))
             "-")))
 
   (defvar scotty/default-mono-font
