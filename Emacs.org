@@ -524,6 +524,7 @@ Let's auto-update the packages!
 #+begin_src emacs-lisp
   (require 'package)
   (require 'use-package)
+  (setq use-package-compute-statistics t)
 
   ;; Add MELPA to the list of package sources
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -749,6 +750,8 @@ Emacs normally won't automatically revert buffers when the underlying file has b
   (setq package-vc-allow-build-commands t)
 
   (use-package reader
+    :ensure t
+    :defer t
     :vc (:url "https://codeberg.org/MonadicSheep/emacs-reader"
               :make "all"))
 
@@ -759,6 +762,8 @@ Emacs normally won't automatically revert buffers when the underlying file has b
 #+begin_src emacs-lisp
 
   (use-package org
+    :ensure t
+    :defer t
     :hook (org-mode . scotty/org-mode-setup)
     :config
     (setq org-ellipsis " ▾")
@@ -791,6 +796,7 @@ Emacs normally won't automatically revert buffers when the underlying file has b
 #+begin_src emacs-lisp
   (use-package ox-gfm
     :ensure t
+    :defer t
     :defer t)
 #+end_src
 
@@ -812,26 +818,30 @@ GFM export doesn't use the title, so it needs this snippet from [[https://emacs.
 ** Markdown
 
 #+begin_src emacs-lisp
-   (use-package markdown-mode
-     :mode (("\\.md\\'" . gfm-mode)
-            ("\\.markdown\\'" . markdown-mode))
-     :custom
-     (markdown-command "multimarkdown")
-     :hook markdown-mode-hook)
+  (use-package markdown-mode
+    :ensure t
+    :defer t
+    :mode (("\\.md\\'" . gfm-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :custom
+    (markdown-command "multimarkdown")
+    :hook markdown-mode-hook)
 
-   (use-package markdown-toc
-     :custom
-     (markdown-toc-indentation-space 4)
-     :hook markdown-mode-hook)
+  (use-package markdown-toc
+    :ensure t
+    :defer t
+    :custom
+    (markdown-toc-indentation-space 4)
+    :hook markdown-mode-hook)
 
-   (defun scotty/markdown-preview-file ()
-     "use Marked 2 to preview the current file"
-     (interactive)
-     (shell-command
-       (format "open -a 'Marked 2.app' %s"
-   	    (shell-quote-argument (buffer-file-name)))))
+  (defun scotty/markdown-preview-file ()
+    "use Marked 2 to preview the current file"
+    (interactive)
+    (shell-command
+      (format "open -a 'Marked 2.app' %s"
+  	    (shell-quote-argument (buffer-file-name)))))
 
-   (global-set-key "\C-cm" 'scotty/markdown-preview-file)
+  (global-set-key "\C-cm" 'scotty/markdown-preview-file)
 #+end_src
 
 ** Licenses
@@ -842,6 +852,7 @@ Default to [[https://opensource.org/license/mit][MIT]] license
   ;; License and Header Template
   (use-package lice
     :ensure t
+    :defer t
     :custom
     (lice:default-license "mit"))
 #+end_src
@@ -886,11 +897,13 @@ Default to [[https://opensource.org/license/mit][MIT]] license
 #+begin_src emacs-lisp
   (use-package flycheck
     :ensure t
+    :defer t
     :config
     (add-hook 'after-init-hook #'global-flycheck-mode))
 
   (use-package lsp-mode
     :ensure t
+    :defer t
     :commands (lsp lsp-deferred)
     :init
     (setq lsp-keymap-prefix "C-c l")
@@ -1137,6 +1150,7 @@ HTML5
 
   (use-package web-mode
     :ensure t
+    :defer t
     :mode (("\\.html\\'" . web-mode)))
 
 #+end_src
@@ -1228,7 +1242,6 @@ Use =vterm= for a terminal
 
   (use-package gcmh
      :ensure t
-     :defer t
      :diminish gcmh-mode
      :config
      (gcmh-mode 1))
@@ -1258,6 +1271,17 @@ Should have created a side window with just the headers in org-mode, but just di
   ;; start server
   (server-start)
 #+end_src
+
+* Profiling Startup
+
+#+begin_src emacs-lisp
+  (use-package benchmark-init
+    :ensure t
+    :config
+    ;; Disable collection after init is finished so it doesn't slow down normal operation
+    (add-hook 'emacs-startup-hook 'benchmark-init/deactivate))
+#+end_src
+
 
 #+begin_src emacs-lisp
   ;; Local Variables:
