@@ -42,7 +42,10 @@ This file is loaded before the package system, and before the GUI is intialized,
   (scroll-bar-mode nil)
   (setq use-dialog-box nil)
   (setq use-file-dialog nil)
-  (setq-default frame-title-format '("%b  -  GNU Emacs"))
+  (setq frame-title-format
+        '(:eval (concat "Emacs (" (format "%s" (frame-parameter nil 'window-id)) ") - " "%b")))
+  (setq-default frame-title-format
+        '(:eval (concat "Emacs (" (format "%s" (frame-parameter nil 'window-id)) ") - " "%b")))
 
   ;; Hide the startup screen
   (setq inhibit-startup-screen t)
@@ -96,8 +99,8 @@ I don't always have the same fonts installed on every system, so pick from a lis
 
   (defvar scotty/mono-font-options
     (list
-     "Hack Nerd Font Mono"
      "IosevkaTermSlab Nerd Font Mono"
+     "Hack Nerd Font Mono"
      "Iosevka Term Slab"
      "IosevkaTerm Nerd Font Mono"
      "Inconsolata"
@@ -197,9 +200,7 @@ The =scotty/org-font-setup= function configures various text faces to tweak the 
 
   (defun scotty/org-mode-setup ()
     "Setup org mode."
-    (org-indent-mode)
     (variable-pitch-mode 1)
-    (setq org-hide-emphasis-markers t)
     (visual-line-mode 1))
 
 #+end_src
@@ -248,15 +249,14 @@ When running in a GUI, set the default  frame size ( 45 rows x 140 columns), set
     (add-to-list 'initial-frame-alist '(top . 0))
     (add-to-list 'initial-frame-alist ''(ns-tool-bar-visible . nil))
 
-    (setq frame-title-format "%f")
-
     (set-face-attribute 'default nil
                         :family scotty/default-mono-font
                         :slant 'normal
                         :height (cond ((< (display-pixel-height) 1550) 160)
                                       ((>= (display-pixel-height) 2160) 300)
                                       (t 220))))
-  (global-set-key (kbd "s-n") #'scotty/new-empty-frame)
+
+  (keymap-global-set "s-n" #'scotty/new-empty-frame)
 #+end_src
 
 ----------
@@ -764,10 +764,34 @@ Emacs normally won't automatically revert buffers when the underlying file has b
   (use-package org
     :ensure t
     :defer t
-    :hook (org-mode . scotty/org-mode-setup)
+
+    :hook #'org-indent-mode #'scotty/org-mode-setup
+
+    :custom
+    (org-directory "~/Documents/Org")
+    (org-agenda-files '("~/Documents/Org"))
+    ;; When a TODO is set to a done state, record a timestamp
+    (org-log-done 'time)
+    ;; Follow the links
+    (org-return-follows-link  t)
+    (org-ellipsis " ▾")
+    (org-hide-emphasis-markers t)
+
+    :init
+    ;; Associate all org files with org mode
+    (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+
     :config
-    (setq org-ellipsis " ▾")
+    ;; Remap the change priority keys to use the UP or DOWN key
+    (define-key org-mode-map (kbd "C-c <up>") 'org-priority-up)
+    (define-key org-mode-map (kbd "C-c <down>") 'org-priority-down)
+
     (when window-system (scotty/org-font-setup)))
+
+  ;; Shortcuts for storing links, viewing the agenda, and starting a capture
+  ;; (keymap-global-set "C-c l" #'org-store-link) ;; conflicts with using C-c l for lsp
+  (keymap-global-set "C-c a" #'org-agenda)
+  (keymap-global-set "C-c c" #'org-capture)
 
 #+end_src
 
@@ -1151,6 +1175,9 @@ HTML5
   (use-package web-mode
     :ensure t
     :defer t
+    :custom
+    (web-mode-indent-style 2)
+    (web-mode-markup-indent-offset tab-width)
     :mode (("\\.html\\'" . web-mode)))
 
 #+end_src
