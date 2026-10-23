@@ -238,6 +238,7 @@ When running in a GUI, set the default  frame size ( 45 rows x 140 columns), set
 
 #+begin_src emacs-lisp :tangle ./gui.el :noweb yes
   (when (or (eq window-system 'ns) (eq window-system 'x))
+    (add-to-list 'default-frame-alist '(alpha-background . 85))
     (add-to-list 'default-frame-alist '(height . 45))
     (add-to-list 'default-frame-alist '(width . 140))
     (add-to-list 'default-frame-alist '(left . 0))
@@ -696,7 +697,7 @@ Use some of =doom-modeline=
     :config
     ;; (dashboard-setup-startup-hook)
     (setq dashboard-banner-logo-title "")
-    (setq dashboard-startup-banner 'logo)
+    (setq dashboard-startup-banner "")
     (setq dashboard-center-content t)
     (setq dashboard-vertically-center-content t)
     (setq dashboard-show-shortcuts t)
