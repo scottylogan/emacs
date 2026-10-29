@@ -638,6 +638,36 @@ Aw, cute little catppuccin!
 
 #+end_src
 
+** Completion
+
+Trying Vertico completion.
+
+#+begin_src emacs-lisp
+  (use-package vertico      ; a vertical completion UI
+    :ensure t
+    :init (vertico-mode +1))
+#+end_src
+
+** Marginalia
+
+Adds margin notes in minibuffer completions.
+
+#+begin_src emacs-lisp
+  (use-package marginalia   ; annotations next to each candidate
+    :ensure t
+    :init (marginalia-mode +1))
+#+end_src
+
+** Orderless
+
+Augments completion matching.
+
+#+begin_src emacs-lisp
+  (use-package orderless    ; space-separated, order-independent matching
+    :ensure t
+    :init (setq completion-styles '(orderless basic)))
+#+end_src
+
 ** Mode Line
 
 Use =diminish= to keep mode line tidy
@@ -1242,6 +1272,24 @@ HTML5
 
 #+end_src
 
+* Dired
+
+Directory browser: config from https://baty.net/posts/2025/03/toggle-hidden-files-in-dired-buffers/
+
+#+begin_src emacs-lisp
+  (use-package dired
+    :init
+    (require 'dired-x) ;; required for dired-omit-mode?
+    :bind
+    (:map dired-mode-map
+          ("s->" . dired-omit-mode)) ;; toggle using Command-Shift-.
+    :hook
+    (dired-mode . (lambda () (dired-omit-mode))) ;; hide dotfiles by default
+    :config
+    (setq dired-omit-files ;; hide .dot files when in dired-omit-mode
+      (concat dired-omit-files "\\|^\\..+$")))
+#+end_src
+
 * Terminal
 
 Use =vterm= for a terminal
@@ -1254,6 +1302,38 @@ Use =vterm= for a terminal
 
 #+end_src
 
+Try ghostel
+
+#+begin_src emacs-lisp
+  (use-package ghostel
+    :ensure t
+    :bind (("C-x m" . ghostel)
+           :map ghostel-semi-char-mode-map
+           ("C-s"  . consult-line)
+           ("C-k"  . my/ghostel-send-C-k-and-kill)
+           ;; I'm used to go up/down the shell history with M-n/p from eshell
+           ;; Simulate this behavior in ghostel by sending C-p and C-n
+           ("M-p" . (lambda () (interactive) (ghostel-send-key "p" "ctrl")))
+           ("M-n" . (lambda () (interactive) (ghostel-send-key "n" "ctrl"))))
+    :config
+    (defun my/ghostel-send-C-k-and-kill ()
+      "Send `C-k' to ghostel.
+  Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
+      (interactive)
+      (kill-ring-save (point) (line-end-position))
+      (ghostel-send-key "k" "ctrl"))
+
+    (add-to-list 'ghostel-eval-cmds '("magit-status-setup-buffer" magit-status-setup-buffer)))
+
+  (use-package ghostel-project
+    :bind (:map project-prefix-map
+           ("m" . ghostel-project)
+           ("M" . ghostel-project-list-buffers))
+    :config
+    (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
+    (add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t))
+
+#+end_src
 
 * Garbage Collection Tuning
 
