@@ -400,8 +400,6 @@ By default Emacs will autosave files in the current directory as =#filename#=; w
         (expand-file-name "org-id-locations" scotty/local-state-dir))
   (setq project-list-file
         (expand-file-name "projects" scotty/local-state-dir))
-  (setq projectile-known-projects-file
-        (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
 
   (setq recentf-save-file
         (expand-file-name "recentf.eld" scotty/local-state-dir))
@@ -965,13 +963,11 @@ Default to [[https://opensource.org/license/mit][MIT]] license
     ("s-p" . projectile-command-map)
     ("C-c p" . projectile-command-map)
     :custom
-    (projectile-switch-project-action #'projectile-dired)
-    (projectile-project-search-path '("~/src"))
-    (projectile-frecency-file
-     (expand-file-name "projectile-frecency.eld" scotty/local-state-dir))
-    (projectile-known-projects-file
-     (expand-file-name "projectile-bookmarks.eld" scotty/local-state-dir))
-
+    (projectile-project-search-path '(("~/src/slac" . 1) ("~/src" . 1)))
+    (projectile-auto-discover-projects t)
+    (projectile-enable-caching 'persistent)
+    (projectile-auto-update-cache t)
+    (projectile-auto-update-cache-with-watches t)
     :init
     (projectile-mode +1))
  #+end_src
